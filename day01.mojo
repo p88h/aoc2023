@@ -46,7 +46,6 @@ fn main():
         @parameter
         fn digitize2(l: Int):
             let s = p.get(l)
-            var dv = DynamicVector[Int](10)
             var d1 = SIMD[DType.int8, 1](0)
             var d2 = SIMD[DType.int8, 1](0)
             let zero = SIMD[DType.int8, 1](ord("0"))

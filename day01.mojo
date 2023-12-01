@@ -1,7 +1,36 @@
 from parser import Parser
 from os.atomic import Atomic
 from algorithm import parallelize
+from utils.vector import DynamicVector
 import benchmark
+
+struct MultiMatcher:
+    var fcv: DynamicVector[Int8]
+    var pfx: DynamicVector[Int32]
+    var msk: DynamicVector[Int32]
+    
+    fn __init__(inout self):
+        self.fcv = DynamicVector[Int8](10)
+        self.pfx = DynamicVector[Int32](10)
+        self.msk = DynamicVector[Int32](10)
+    
+    fn add(inout self, s: String):
+        let l = len(s)
+        self.fcv.push_back(s._buffer[l - 1])
+        var r: Int32 = 0
+        var m: Int32 = 0
+        for i in range(l-1):
+            r = (r << 8) + s._buffer[i].to_int()
+            m = (m << 8) + 0xFF
+        self.pfx.push_back(r)
+        self.msk.push_back(m)
+    
+    fn check(self, cc: Int8, prev: Int32) -> Int:
+        for i in range(10):
+            if self.fcv[i] == cc and (prev & self.msk[i]) == self.pfx[i]:
+                return i
+        return -1
+
 
 fn main():
     try:
@@ -16,41 +45,40 @@ fn main():
             var d1 = SIMD[DType.int8, 1](0)
             var d2 = SIMD[DType.int8, 1](0)
             let zero = SIMD[DType.int8, 1](ord("0"))
-            var first = True
             for i in range(len(s)):
                 let c = s._buffer[i]
                 if c >= ord("0") and c <= ord("9"):
+                    d1 = c - zero
+                    break
+            for i in range(len(s)-1,-1,-1):
+                let c = s._buffer[i]
+                if c >= ord("0") and c <= ord("9"):
                     d2 = c - zero
-                    if first:
-                        d1 = c - zero
-                        first = False
+                    break
             a1 += d1.to_int() * 10 + d2.to_int()
 
-        fn encode(s: String) -> Int32:
-            var ret: Int32 = 0
-            for i in range(len(s)):
-                ret = (ret << 8) + s._buffer[i].to_int()
-            return ret
+        var m = MultiMatcher()
+        var r = MultiMatcher()
 
-        # prceding characters for each digit literal
-        let p1 = encode("on")
-        let p2 = encode("tw")
-        let p3 = encode("thre")
-        let p4 = encode("fou")
-        let p5 = encode("fiv")
-        let p6 = encode("si")
-        let p7 = encode("seve")
-        let p8 = encode("eigh")
-        let p9 = encode("nin")
-        let p0 = encode("zer")
+        fn reverse(s: String) -> String:
+            var r = String()
+            for i in range(len(s)):
+                r += s[len(s)-i-1]
+            return r
+
+        @parameter
+        fn store(s: String):
+            m.add(s)
+            r.add(reverse(s))
+        store("zero"); store("one"); store("two"); store("three"); store("four")
+        store("five"); store("six"); store("seven"); store("eight"); store("nine")
 
         @parameter
         fn digitize2(l: Int):
-            let s = p.get(l)
+            let s = p.get(l)            
             var d1 = 0
             var d2 = 0
             let zero = SIMD[DType.int8, 1](ord("0"))
-            var first = True
             # last four characters code
             var l4 : Int32 = 0
             for i in range(len(s)):
@@ -59,30 +87,26 @@ fn main():
                 if c >= ord("0") and c <= ord("9"):
                     d = (c - zero).to_int()
                 else:
-                    # last two / three chars
-                    let l2 = l4 & 0xFFFF
-                    let l3 = l4 & 0xFFFFFF
-                    # look for last letter + preceding letters code combination
-                    if c == ord('e'):
-                        if l2 == p1: d = 1
-                        if l4 == p3: d = 3
-                        if l3 == p5: d = 5
-                        if l3 == p9: d = 9
-                    if c == ord('o'):
-                        if l2 == p2: d = 2
-                        if l3 == p9: d = 0
-                    if c == ord('r') and l3 == p4: d = 4
-                    if c == ord('x') and l2 == p6: d = 6
-                    if c == ord('n') and l4 == p7: d = 7
-                    if c == ord('t') and l4 == p8: d = 8
+                    d = m.check(c, l4)
                 # update code
                 l4 = (l4 << 8) + c.to_int()
-                
                 if d >= 0:
-                    if first:
-                        d1 = d
-                        first = False
+                    d1 = d
+                    break
+            l4 = 0
+            for i in range(len(s)-1,-1,-1):
+                let c = s._buffer[i]
+                var d = -1
+                if c >= ord("0") and c <= ord("9"):
+                    d = (c - zero).to_int()
+                else:
+                    d = r.check(c, l4)
+                # update code
+                l4 = (l4 << 8) + c.to_int()
+                if d >= 0:
                     d2 = d
+                    break
+
             a2 += d1 * 10 + d2
         
         @parameter

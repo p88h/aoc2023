@@ -15,7 +15,9 @@ mojo 0.5.0 (6e50a738)
 ```
 
 ```
-Task            Python      PyPy3       Mojo        Mojo x 24 threads
-Day1 Part1      0.81 ms     0.18 ms     0.35 ms     0.05 ms 
-Day1 Part2      8.92 ms     0.89 ms     1.21 ms     0.17 ms
+Task                    Python      PyPy3       Mojo        Mojo x 24 threads
+Day1 Part1 naive        0.81 ms     0.18 ms     0.35 ms     0.05 ms 
+Day1 Part2 naive        8.92 ms     0.89 ms     1.21 ms     0.17 ms
+Day1 Part1 optimized    0.66 ms     0.18 ms     0.27 ms     0.05 ms 
+Day1 Part2 optimized    2.45 ms     0.30 ms     0.22 ms     0.04 ms
 ```

@@ -1,6 +1,6 @@
 import sys
 import time
-lines = open("day01.txt").readlines();
+lines = open("day01.txt").readlines()
 
 def part1():
     s = 0

@@ -1,6 +1,4 @@
 from parser import Parser
-from utils.vector import DynamicVector
-from utils.vector import InlinedFixedVector
 from os.atomic import Atomic
 from algorithm import parallelize
 import benchmark
@@ -28,29 +26,55 @@ fn main():
                         first = False
             a1 += d1.to_int() * 10 + d2.to_int()
 
+        fn encode(s: String) -> Int32:
+            var ret: Int32 = 0
+            for i in range(len(s)):
+                ret = (ret << 8) + s._buffer[i].to_int()
+            return ret
+
+        let p1 = encode("on")
+        let p2 = encode("tw")
+        let p3 = encode("thre")
+        let p4 = encode("fou")
+        let p5 = encode("fiv")
+        let p6 = encode("si")
+        let p7 = encode("seve")
+        let p8 = encode("eigh")
+        let p9 = encode("nin")
+        let p0 = encode("zer")
+
         @parameter
         fn digitize2(l: Int):
             let s = p.get(l)
+            var dv = DynamicVector[Int](10)
             var d1 = SIMD[DType.int8, 1](0)
             var d2 = SIMD[DType.int8, 1](0)
             let zero = SIMD[DType.int8, 1](ord("0"))
             var first = True
+            var l2 : Int32 = 0
+            var l3 : Int32 = 0
+            var l4 : Int32 = 0
             for i in range(len(s)):
                 let c = s._buffer[i]
-                var d = SIMD[DType.int8, 1](-1)
+                var d = SIMD[DType.int8, 1](-1)            
                 if c >= ord("0") and c <= ord("9"):
                     d = c - zero
-                # this is stupid.
-                if s[i:i+3] == "one": d = 1
-                if s[i:i+3] == "two": d = 2
-                if s[i:i+5] == "three": d = 3
-                if s[i:i+4] == "four": d = 4
-                if s[i:i+4] == "five": d = 5
-                if s[i:i+3] == "six": d = 6
-                if s[i:i+5] == "seven": d = 7
-                if s[i:i+5] == "eight": d = 8
-                if s[i:i+4] == "nine": d = 9
-                if s[i:i+4] == "zero": d = 0
+                else:
+                    if c == ord('e'):
+                        if l2 == p1: d = 1
+                        if l4 == p3: d = 3
+                        if l3 == p5: d = 5
+                        if l3 == p9: d = 9
+                    if c == ord('o'):
+                        if l2 == p2: d = 2
+                        if l3 == p9: d = 0
+                    if c == ord('r') and l3 == p4: d = 4
+                    if c == ord('x') and l2 == p6: d = 6
+                    if c == ord('n') and l4 == p7: d = 7
+                    if c == ord('t') and l4 == p8: d = 8
+                l2 = ((l2 << 8) + c.to_int()) & 0xFFFF
+                l3 = ((l3 << 8) + c.to_int()) & 0xFFFFFF
+                l4 = (l4 << 8) + c.to_int()
                 if d >= 0:
                     if first:
                         d1 = d

@@ -32,6 +32,7 @@ fn main():
                 ret = (ret << 8) + s._buffer[i].to_int()
             return ret
 
+        # prceding characters for each digit literal
         let p1 = encode("on")
         let p2 = encode("tw")
         let p3 = encode("thre")
@@ -46,19 +47,22 @@ fn main():
         @parameter
         fn digitize2(l: Int):
             let s = p.get(l)
-            var d1 = SIMD[DType.int8, 1](0)
-            var d2 = SIMD[DType.int8, 1](0)
+            var d1 = 0
+            var d2 = 0
             let zero = SIMD[DType.int8, 1](ord("0"))
             var first = True
-            var l2 : Int32 = 0
-            var l3 : Int32 = 0
+            # last four characters code
             var l4 : Int32 = 0
             for i in range(len(s)):
                 let c = s._buffer[i]
-                var d = SIMD[DType.int8, 1](-1)            
+                var d = -1
                 if c >= ord("0") and c <= ord("9"):
-                    d = c - zero
+                    d = (c - zero).to_int()
                 else:
+                    # last two / three chars
+                    let l2 = l4 & 0xFFFF
+                    let l3 = l4 & 0xFFFFFF
+                    # look for last letter + preceding letters code combination
                     if c == ord('e'):
                         if l2 == p1: d = 1
                         if l4 == p3: d = 3
@@ -71,15 +75,15 @@ fn main():
                     if c == ord('x') and l2 == p6: d = 6
                     if c == ord('n') and l4 == p7: d = 7
                     if c == ord('t') and l4 == p8: d = 8
-                l2 = ((l2 << 8) + c.to_int()) & 0xFFFF
-                l3 = ((l3 << 8) + c.to_int()) & 0xFFFFFF
+                # update code
                 l4 = (l4 << 8) + c.to_int()
+                
                 if d >= 0:
                     if first:
                         d1 = d
                         first = False
                     d2 = d
-            a2 += d1.to_int() * 10 + d2.to_int()
+            a2 += d1 * 10 + d2
         
         @parameter
         fn part1():

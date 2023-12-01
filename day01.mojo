@@ -87,7 +87,7 @@ fn main():
 
         @parameter
         fn part1_parallel():
-            parallelize[digitize1](p.length(), 16)
+            parallelize[digitize1](p.length(), 24)
 
         @parameter
         fn part2():
@@ -95,7 +95,7 @@ fn main():
 
         @parameter
         fn part2_parallel():
-            parallelize[digitize2](p.length(), 16)
+            parallelize[digitize2](p.length(), 24)
 
         part1()
         print(a1.value.to_int())

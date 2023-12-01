@@ -66,12 +66,10 @@ fn main():
                 r += s[len(s)-i-1]
             return r
 
-        @parameter
-        fn store(s: String):
-            m.add(s)
-            r.add(reverse(s))
-        store("zero"); store("one"); store("two"); store("three"); store("four")
-        store("five"); store("six"); store("seven"); store("eight"); store("nine")
+        var words = VariadicList[StringLiteral]("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+        for i in range(len(words)):
+            m.add(words[i])
+            r.add(reverse(words[i]))
 
         @parameter
         fn digitize2(l: Int):

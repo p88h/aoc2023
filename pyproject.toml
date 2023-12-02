@@ -1,0 +1,3 @@
+[tool.black]
+line-length = 128
+skip-magic-trailing-comma = 1

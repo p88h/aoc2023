@@ -48,24 +48,40 @@ fn main() raises:
     var sum2 = Atomic[DType.int32](0)
 
     @parameter
+    fn step1(l: Int):
+        let mballs = maxdict(lines.get(l))
+        if (mballs.get("r") <= 12 and mballs.get("g") <= 13 and mballs.get("b") <= 14):
+            sum1 += l + 1
+
+    @parameter
     fn part1():
-        for l in range(lines.length()):
-            let mballs = maxdict(lines.get(l))
-            if (mballs.get("r") <= 12 and mballs.get("g") <= 13 and mballs.get("b") <= 14):
-                sum1 += l + 1
+        for l in range(lines.length()): step1(l)
+
+    @parameter
+    fn part1_parallel():
+        parallelize[step1](lines.length(), 2)
+
+    @parameter
+    fn step2(l: Int):
+        let mballs = maxdict(lines.get(l))
+        sum2 += mballs.get("r") * mballs.get("g") * mballs.get("b")
 
     @parameter
     fn part2():
-        for l in range(lines.length()):
-            let mballs = maxdict(lines.get(l))
-            sum2 += mballs.get("r") * mballs.get("g") * mballs.get("b")
+        for l in range(lines.length()): step2(l)
 
-    part1()
+    @parameter
+    fn part2_parallel():
+        parallelize[step2](lines.length(), 2)
+
+    part1_parallel()
     print(sum1.value.to_int())
-    part2()
+    part2_parallel()
     print(sum2.value.to_int())
 
     print("part1 :", benchmark.run[part1]().mean["ms"](), "ms")
+    print("part1_parallel:", benchmark.run[part1_parallel]().mean["ms"](), "ms")
     print("part1 :", benchmark.run[part2]().mean["ms"](), "ms")
+    print("part2_parallel:", benchmark.run[part2_parallel]().mean["ms"](), "ms")
 
     print(lines.length(), "rows")

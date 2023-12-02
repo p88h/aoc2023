@@ -1,5 +1,4 @@
-import sys
-import time
+from benchy import minibench
 lines = open("day01.txt").readlines()
 
 def look(line):
@@ -34,15 +33,5 @@ def part2():
 
 print(part1())
 print(part2())
-start = time.time()
-t = 0
-for _ in range(100):
-    t += part1()
-end = time.time()
-print("part1: ", (end - start)*10,"ms")
-start = time.time()
-for _ in range(100):
-    t += part2()
-end = time.time()
-print("part2: ", (end - start)*10,"ms")
 
+minibench({"part1": part1, "part2": part2})

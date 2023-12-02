@@ -1,9 +1,7 @@
 from parser import Parser
 from os.atomic import Atomic
-from algorithm import parallelize
 from utils.vector import DynamicVector
-import benchmark
-
+from wrappers import run_multiline_task
 
 struct PseudoDict:
     var vals: DynamicVector[Int]
@@ -33,7 +31,7 @@ fn maxdict(s: String) -> PseudoDict:
     for d in range(draws.length()):
         let colors = Parser(draws.get(d), ", ")
         for b in range(colors.length()):
-            let tok = colors.get(b)
+            let tok = String(colors.get(b))
             let p = tok.find(" ")
             try:
                 let v = atol(tok[:p])
@@ -57,36 +55,14 @@ fn main() raises:
             sum1 += l + 1
 
     @parameter
-    fn part1():
-        for l in range(lines.length()):
-            step1(l)
-
-    @parameter
-    fn part1_parallel():
-        parallelize[step1](lines.length(), 2)
-
-    @parameter
     fn step2(l: Int):
         let mballs = maxdict(lines.get(l))
         sum2 += mballs.get("r") * mballs.get("g") * mballs.get("b")
 
     @parameter
-    fn part2():
-        for l in range(lines.length()):
-            step2(l)
-
-    @parameter
-    fn part2_parallel():
-        parallelize[step2](lines.length(), 2)
-
-    part1_parallel()
-    print(sum1.value.to_int())
-    part2_parallel()
-    print(sum2.value.to_int())
-
-    print("part1 :", benchmark.run[part1]().mean["ms"](), "ms")
-    print("part1_parallel:", benchmark.run[part1_parallel]().mean["ms"](), "ms")
-    print("part1 :", benchmark.run[part2]().mean["ms"](), "ms")
-    print("part2_parallel:", benchmark.run[part2_parallel]().mean["ms"](), "ms")
-
+    fn results():
+        print(sum1.value.to_int())
+        print(sum2.value.to_int())
+    
+    run_multiline_task[step1,step2](lines.length(), results, 4)
     print(lines.length(), "rows")

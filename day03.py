@@ -11,9 +11,9 @@ def find_nums():
         r = 0
         q = 0
         for x in range(dimx):
-            c = lines[y][x]
-            if c.isdigit():
-                d = int(c) 
+            c = ord(lines[y][x])
+            if c >= 48 and c <= 57:
+                d = c - 48 
                 r = r * 10 + d
                 q += 1
             else:
@@ -37,17 +37,14 @@ def part1():
             n += lines[y][x+l]
         if (y + 1 < dimy):
             n += lines[y+1][sx:x+l+1]
-        good = False
         for c in n:
             if c != '.' and not c.isdigit():
-                good = True
-        if good:
-            s += v
+                s += v
+                break
     return s
 
 def part2():
-    gc = {}
-    gv = {}
+    gc = [ 0 ] * (dimx*dimy)
     s2 = 0
     for (y,x,l,v) in nums:
         sx = max(x-1,0)
@@ -58,14 +55,9 @@ def part2():
             for gx in range(sx,lx+1):
                 if lines[gy][gx] == '*':
                     gk = gy * dimx + gx
-                    if gk not in gc:
-                        gc[gk]=0
-                        gv[gk]=1
-                    gc[gk] += 1
-                    gv[gk] *= v
-    for gk in gc:
-        if gc[gk] == 3:
-            s2 += gv[gk]
+                    if gc[gk] != 0:
+                        s2 += gc[gk] * v
+                    gc[gk] = v            
     return s2
 
 find_nums()

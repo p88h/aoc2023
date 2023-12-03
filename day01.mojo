@@ -20,7 +20,7 @@ struct MultiMatcher:
         var r: Int32 = 0
         var m: Int32 = 0
         for i in range(l - 1):
-            r = (r << 8) + ord(s[i])
+            r = (r << 8) + s._buffer[i].to_int()
             m = (m << 8) + 0xFF
         self.pfx.push_back(r)
         self.msk.push_back(m)
@@ -37,24 +37,25 @@ fn main() raises:
     let p = Parser(f.read())
     var a1 = Atomic[DType.int32](0)
     var a2 = Atomic[DType.int32](0)
+    let zero = 48
+    let nine = 57
 
     @parameter
     fn digitize1(l: Int):
         let s = p.get(l)
-        var d1 = SIMD[DType.int8, 1](0)
-        var d2 = SIMD[DType.int8, 1](0)
-        let zero = SIMD[DType.int8, 1](ord("0"))
+        var d1 = 0
+        var d2 = 0
         for i in range(len(s)):
             let c = ord(s[i])
-            if c >= ord("0") and c <= ord("9"):
+            if c >= zero and c <= nine:
                 d1 = c - zero
                 break
         for i in range(len(s) - 1, -1, -1):
             let c = ord(s[i])
-            if c >= ord("0") and c <= ord("9"):
+            if c >= zero and c <= nine:
                 d2 = c - zero
                 break
-        a1 += d1.to_int() * 10 + d2.to_int()
+        a1 += d1 * 10 + d2
 
     var m = MultiMatcher()
     var r = MultiMatcher()
@@ -75,13 +76,12 @@ fn main() raises:
         let s = p.get(l)
         var d1 = 0
         var d2 = 0
-        let zero = ord('0')
         # last four characters code
         var l4: Int32 = 0
         for i in range(len(s)):
             let c = ord(s[i])
             var d = -1
-            if c >= ord("0") and c <= ord("9"):
+            if c >= zero and c <= nine:
                 d = (c - zero)
             else:
                 d = m.check(c, l4)
@@ -94,7 +94,7 @@ fn main() raises:
         for i in range(len(s) - 1, -1, -1):
             let c = ord(s[i])
             var d = -1
-            if c >= ord("0") and c <= ord("9"):
+            if c >= zero and c <= nine:
                 d = (c - zero)
             else:
                 d = r.check(c, l4)

@@ -25,4 +25,7 @@ Day2 Part2              0.30 ms    [0.11 ms]    0.26 ms     0.15 ms (x4)
 Day3 Parser             0.62 ms     0.04 ms    [0.02 ms]    n/a
 Day3 Part1              0.37 ms     0.05 ms    [0.01 ms]    n/a
 Day3 Part2              0.81 ms     0.09 ms    [0.01 ms]    n/a
+Day4 Parser             0.42 ms     0.22 ms    [0.07 ms]    n/a
+Day4 Part1              0.08 ms     0.05 ms    [0.97 μs]    n/a
+Day4 Part2              0.12 ms     0.06 ms    [1.07 μs]    n/a
 ```

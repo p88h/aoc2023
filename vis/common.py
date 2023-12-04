@@ -5,19 +5,20 @@ import time
 import argparse
 
 class View:
-    def __init__(self, W=1920, H=1080, FPS=60) -> None:
+    def __init__(self, W=1920, H=1080, FPS=60, FS=16) -> None:
         self.width = W
         self.height = H
         self.fps = FPS
         self.save = False
         self.frame = 0
+        self.fsize = FS
 
     def setup(self, title="AOC"):
         pygame.init()
         pygame.font.init()
         self.win = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption(title)
-        self.font = pygame.freetype.Font("vis/Inconsolata-SemiBold.ttf", 16)
+        self.font = pygame.freetype.Font("vis/Inconsolata-SemiBold.ttf", self.fsize)
         self.font.origin = True
         self.clock = pygame.time.Clock()
         self.win.fill((0, 0, 0))

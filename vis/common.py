@@ -4,6 +4,7 @@ import os
 import time
 import argparse
 
+
 class View:
     def __init__(self, W=1920, H=1080, FPS=60, FS=16) -> None:
         self.width = W
@@ -87,7 +88,7 @@ class Controller:
             view.record(os.path.join(self.workdir(), self.basename() + ".mp4"))
         if self.args.fps:
             view.fps = self.args.fps
-            print("Override FPS to: ", view.fps)            
+            print("Override FPS to: ", view.fps)
         pygame.event.clear()
         start = time.time()
         fcnt = 0

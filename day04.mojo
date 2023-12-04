@@ -25,9 +25,9 @@ fn main() raises:
     # Result counters (not parallelizing this though)
     var sum1 = Atomic[DType.int32](0)
     var sum2 = Atomic[DType.int32](0)
-    
+
     # Count the bits in a SIMD vector. Mojo doesn't expose the intrinsics that do this
-    # natively, shame. But we can reduce at least, so we just need 3 shifting steps. 
+    # natively, shame. But we can reduce at least, so we just need 3 shifting steps.
     @always_inline
     fn bitcnt(m: SIMD[DType.uint8, 16]) -> Int:
         # odd / even bits
@@ -109,7 +109,7 @@ fn main() raises:
             let x = matches(games[i])
             # Update next x draws
             for j in range(i + 1, min(count, i + x + 1)):
-                draws.store(j, draws.load(j) + cd)            
+                draws.store(j, draws.load(j) + cd)
             sum2 += cd
 
     @parameter
@@ -119,10 +119,10 @@ fn main() raises:
 
     # This part doesn't seem to benefit much from parallelization, so just run benchmarks.
     print("parse:", benchmark.run[parse]().mean["ms"](), "ms")
-    # Achievement #3 (positive) - had to go to microseconds here. 
-    print("part1:", benchmark.run[part1]().mean["ns"]()/1000, "μs")
+    # Achievement #3 (positive) - had to go to microseconds here.
+    print("part1:", benchmark.run[part1]().mean["ns"]() / 1000, "μs")
     print(sum1)
-    print("part2:", benchmark.run[part2]().mean["ns"]()/1000, "μs")
+    print("part2:", benchmark.run[part2]().mean["ns"]() / 1000, "μs")
     print(sum2)
 
     # Ensure `lines` and `games` are still in use

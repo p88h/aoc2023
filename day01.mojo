@@ -86,7 +86,7 @@ fn main() raises:
     var m = MultiMatcher()
     var r = MultiMatcher()
 
-    # There is no String reverse in Mojo. This is only used for the static patterns. 
+    # There is no String reverse in Mojo. This is only used for the static patterns.
     fn reverse(s: String) -> String:
         var r = String()
         for i in range(len(s)):
@@ -94,8 +94,8 @@ fn main() raises:
         return r
 
     # Construct matchers for all words. When looking backwards, the words have to be reversed.
-    # Fun fact - VariadicList apparently can hold literals, but cannot hold Strings. 
-    # Variadic since other list variants only make sense in some very specific contexts 
+    # Fun fact - VariadicList apparently can hold literals, but cannot hold Strings.
+    # Variadic since other list variants only make sense in some very specific contexts
     # like when you only use predetermined list sizes and don't iterate over the list.
     var words = VariadicList[StringLiteral]("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
     for i in range(len(words)):
@@ -114,7 +114,7 @@ fn main() raises:
         for i in range(len(s)):
             # Another fun fact, since the Parser tries not to re-create all strings, it uses StringRefs.
             # StringRefs _don't_ have an exposed buffer and don't have _as_ptr() function so you cannot
-            # access the character buffer. Will probably need to write my own StringView. 
+            # access the character buffer. Will probably need to write my own StringView.
             let c = ord(s[i])
             var d = -1
             if c >= zero and c <= nine:
@@ -147,7 +147,7 @@ fn main() raises:
         print(a1.value.to_int())
         print(a2.value.to_int())
 
-    # this wraps executing the step functions, benchmarking them etc. 
+    # this wraps executing the step functions, benchmarking them etc.
     run_multiline_task[digitize1, digitize2](p.length(), results, 12)
 
     # While this looks like debug info, Mojo actually sometimes forgets I need the parser in all these step

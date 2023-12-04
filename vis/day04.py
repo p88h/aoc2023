@@ -30,7 +30,7 @@ class Card:
             tx = 20 + (i % 10) * fw * 2
             ty = 20 + (i // 10) * fh
             if i in n1:
-                pygame.draw.rect(self.win, (0, 0, 0, 0), (tx - 2, ty, fw * 2 - 2 , fh - 2))
+                pygame.draw.rect(self.win, (0, 0, 0, 0), (tx - 2, ty, fw * 2 - 2, fh - 2))
             if i in n2:
                 view.font.render_to(self.hand, (tx, ty + fh - 8), str(i), (200, 200, 200))
 
@@ -57,17 +57,31 @@ class Game:
         self.shift = 0
         self.mode = 0
         self.sidx = 0
-        self.msgs = [ "", "(c) 1730-2023 BINGO AND SCRATCHCARD CORPORATION OF NORTH POLE", 
-                      "", "YOU WILL NEED A BAG TO HOLD THEESE SCRATCHCARDS. GO SEE https://adventofcode.com/2020/day/7",
-                      "", "DO NOT TRUST THE SQUIDS. https://adventofcode.com/2021/day/4 ",                       
-                      "", "PUNCHCARD SERVICES PROVIDED BY INTERNATIONAL PUNCHCARD MACHINES (R)",
-                      "", "VISIT https://tinyurl.com/3tjhjfnw TO WIN EVEN MORE SCRATCHCARDS", 
-                      "", "",
-                      "", "THE CAKE IS A LIE",
-                      "", "THE PRINCESS IS IN ANOTHER CASTLE",
-                      "", "NOTHING TO SEE HERE. REALLY.",
-                      "", "BYE!","BYE!!","BYE!!!"]
-        self.muls = [ 2, 3, 4, 5, 6, 8, 10 , 15, 30 ]
+        self.msgs = [
+            "",
+            "(c) 1730-2023 BINGO AND SCRATCHCARD CORPORATION OF NORTH POLE",
+            "",
+            "YOU WILL NEED A BAG TO HOLD THEESE SCRATCHCARDS. GO SEE https://adventofcode.com/2020/day/7",
+            "",
+            "DO NOT TRUST THE SQUIDS. https://adventofcode.com/2021/day/4 ",
+            "",
+            "PUNCHCARD SERVICES PROVIDED BY INTERNATIONAL PUNCHCARD MACHINES (R)",
+            "",
+            "VISIT https://tinyurl.com/3tjhjfnw TO WIN EVEN MORE SCRATCHCARDS",
+            "",
+            "",
+            "",
+            "THE CAKE IS A LIE",
+            "",
+            "THE PRINCESS IS IN ANOTHER CASTLE",
+            "",
+            "NOTHING TO SEE HERE. REALLY.",
+            "",
+            "BYE!",
+            "BYE!!",
+            "BYE!!!",
+        ]
+        self.muls = [2, 3, 4, 5, 6, 8, 10, 15, 30]
         self.speed = self.muls[0]
         self.counts = [1] * len(games)
         self.score = 0
@@ -95,7 +109,7 @@ class Game:
             card = self.cards[self.sidx + i]
             card.blit(view, i * card.width - self.shift, 0, "  x " + str(self.counts[self.sidx + i]))
         view.font.render_to(view.win, (20, 120 + scard.height * 2), "SCORE: " + str(self.score), (200, 200, 200))
-        view.font.render_to(view.win, (20, 200 + scard.height * 2), self.msgs[self.sidx//10], (200, 200, 200))
+        view.font.render_to(view.win, (20, 200 + scard.height * 2), self.msgs[self.sidx // 10], (200, 200, 200))
 
         if self.mode == 0:
             if self.pan < scard.height + 30:
@@ -118,8 +132,7 @@ class Game:
                     self.speed = self.muls[self.sidx]
                 if self.sidx >= len(self.games):
                     controller.animate = False
-                
-        
+
 
 view = View(1920, 1080, 60, 24)
 view.setup("Day 03")

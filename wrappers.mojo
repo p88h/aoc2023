@@ -1,7 +1,9 @@
 from algorithm import parallelize
 import benchmark
 
-fn run_multiline_task[f1: fn(Int, /) capturing -> None, f2: fn(Int, /) capturing -> None](len: Int, disp: fn() capturing -> None, workers: Int = 12):
+
+fn run_multiline_task[f1: fn (Int, /) capturing -> None, f2: fn (Int, /) capturing -> None]
+    (len: Int, disp: fn () capturing -> None, workers: Int = 12):
     @parameter
     fn part1():
         for l in range(len):

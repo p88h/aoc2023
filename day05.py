@@ -6,6 +6,7 @@ numbers = []
 ranges = []
 steps = []
 
+
 def parse():
     s = lines[0].split()
     numbers.clear()
@@ -20,12 +21,14 @@ def parse():
             continue
         if line[-1] == ":":
             cur.sort()
+            print(cur)
             steps.append(cur)
             cur = []
             continue
         (dst, src, l) = map(int, line.split())
         cur.append((src, dst, l))
     return 0
+
 
 def part1():
     work = numbers.copy()
@@ -41,11 +44,12 @@ def part1():
                     next.append(n + dst - src)
                 n = -1
                 break
-            if (n >= 0):
+            if n >= 0:
                 next.append(n)
         work = next
     return min(work)
-                
+
+
 def part2():
     work = ranges.copy()
     for step in steps:
@@ -55,25 +59,25 @@ def part2():
                 ofs = dst - src
                 if a >= src + l:
                     continue
-                if a < src: # some is untranslated
+                if a < src:  # some is untranslated
                     next.append((a, src - 1))
                     a = src
-                # a >= src. 
-                if b >= src + l: # some range remains
+                # a >= src.
+                if b >= src + l:  # some range remains
                     next.append((a + ofs, (src + l - 1) + ofs))
                     a = src + l
-                else: # everything fits
+                else:  # everything fits
                     next.append((a + ofs, b + ofs))
                     a = b + 1
                     break
-            if (a <= b): # some was left untranslated
-                next.append((a,b))
+            if a <= b:  # some was left untranslated
+                next.append((a, b))
         work = []
-        for (a,b) in sorted(next):
+        for a, b in sorted(next):
             if work and (a == work[-1][1] + 1):
-                work[-1] = (work[-1][0],b)
+                work[-1] = (work[-1][0], b)
             else:
-                work.append((a,b))
+                work.append((a, b))
     return work[0][0]
 
 

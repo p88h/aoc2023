@@ -6,7 +6,6 @@ struct Keeper:
 
     fn __init__(inout self, owned s: String):
         # the behavior is broken regardless of whether we copy or move.
-        # It seems to be also broken if we manually copy underlying bytes.
         self.keep = s ^
 
     fn slice(self, start: Int, l: Int) -> StringRef:
@@ -24,10 +23,9 @@ struct ByteKeeper:
     var size: Int
 
     fn __init__(inout self, owned s: String):
-        # the behavior is broken regardless of whether we copy or move.
-        # It seems to be also broken if we manually copy underlying bytes.
         self.keep = charptr.alloc(len(s))
         self.size = len(s)
+        # It seems to be also broken if we manually copy underlying bytes.
         memcpy(self.keep, s._as_ptr(), len(s))
 
     fn slice(self, start: Int, l: Int) -> StringRef:

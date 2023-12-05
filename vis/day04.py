@@ -135,7 +135,7 @@ class Game:
 
 
 view = View(1920, 1080, 60, 24)
-view.setup("Day 03")
+view.setup("Day 04")
 controller = Controller()
 lines = open(controller.workdir() + "/day04.txt").read().split("\n")
 controller.add(Game(parse(lines)))

@@ -1,18 +1,39 @@
 from parser import Parser
 from os.atomic import Atomic
 from utils.vector import DynamicVector
-from wrappers import run_multiline_task
 from math import min, max
 from memory import memset
-from algorithm import parallelize
-import benchmark
+from wrappers import minibench
 
 alias intptr = DTypePointer[DType.int32]
 # | and 0 characters
 alias space = 32
 alias zero = 48
 
+# Count the bits in a SIMD vector. Mojo doesn't expose the intrinsics that do this
+# natively, shame. But we can reduce at least, so we just need 3 shifting steps.
+fn bitcnt(m: SIMD[DType.uint8, 16]) -> Int:
+    # odd / even bits
+    let s55 = SIMD[DType.uint8, 16](0x55)
+    # two-bit mask
+    let s33 = SIMD[DType.uint8, 16](0x33)
+    # four-bit mask
+    let s0F = SIMD[DType.uint8, 16](0x0F)
+    # ref: Hacker's Delight or https://en.wikipedia.org/wiki/Hamming_weight
+    var mm = m - ((m >> 1) & s55)
+    mm = (mm & s33) + ((mm >> 2) & s33)
+    mm = (mm + (mm >> 4)) & s0F
+    return mm.reduce_add[1]().to_int()
 
+# Count number of matches in a game
+@always_inline
+fn matches(t: Tuple[SIMD[DType.uint8, 16], SIMD[DType.uint8, 16]]) -> Int:
+    let win: SIMD[DType.uint8, 16]
+    let hand: SIMD[DType.uint8, 16]
+    (win, hand) = t
+    return bitcnt(win & hand)
+
+@always_inline
 fn main() raises:
     let f = open("day04.txt", "r")
     let lines = Parser(f.read())
@@ -25,22 +46,6 @@ fn main() raises:
     # Result counters (not parallelizing this though)
     var sum1 = Atomic[DType.int32](0)
     var sum2 = Atomic[DType.int32](0)
-
-    # Count the bits in a SIMD vector. Mojo doesn't expose the intrinsics that do this
-    # natively, shame. But we can reduce at least, so we just need 3 shifting steps.
-    @always_inline
-    fn bitcnt(m: SIMD[DType.uint8, 16]) -> Int:
-        # odd / even bits
-        let s55 = SIMD[DType.uint8, 16](0x55)
-        # two-bit mask
-        let s33 = SIMD[DType.uint8, 16](0x33)
-        # four-bit mask
-        let s0F = SIMD[DType.uint8, 16](0x0F)
-        # ref: Hacker's Delight or https://en.wikipedia.org/wiki/Hamming_weight
-        var mm = m - ((m >> 1) & s55)
-        mm = (mm & s33) + ((mm >> 2) & s33)
-        mm = (mm + (mm >> 4)) & s0F
-        return mm.reduce_add[1]().to_int()
 
     # Set a single bit in a 8-bit based bitfield
     @always_inline
@@ -80,14 +85,6 @@ fn main() raises:
             let s2 = s[sep + 2 : len(s)]
             games.push_back((bitfield(s1), bitfield(s2)))
 
-    # Count number of matches in a game
-    @always_inline
-    fn matches(t: Tuple[SIMD[DType.uint8, 16], SIMD[DType.uint8, 16]]) -> Int:
-        let win: SIMD[DType.uint8, 16]
-        let hand: SIMD[DType.uint8, 16]
-        (win, hand) = t
-        return bitcnt(win & hand)
-
     # Take numbers of matches, exponentiate, sum up
     @parameter
     fn part1():
@@ -112,17 +109,11 @@ fn main() raises:
                 draws.store(j, draws.load(j) + cd)
             sum2 += cd
 
-    @parameter
-    fn results():
-        print(sum1.value.to_int())
-        print(sum2.value.to_int())
-
     # This part doesn't seem to benefit much from parallelization, so just run benchmarks.
-    print("parse:", benchmark.run[parse]().mean["ms"](), "ms")
-    # Achievement #3 (positive) - had to go to microseconds here.
-    print("part1:", benchmark.run[part1]().mean["ns"]() / 1000, "μs")
+    minibench[parse]("parse", 1000, "ms")
+    minibench[part1]("part1", 1000, "μs")
     print(sum1)
-    print("part2:", benchmark.run[part2]().mean["ns"]() / 1000, "μs")
+    minibench[part2]("part2", 1000, "μs")
     print(sum2)
 
     # Ensure `lines` and `games` are still in use

@@ -8,23 +8,24 @@ struct Parser:
     """
 
     # need to hold these
-    var contents: String
+    var contents: DTypePointer[DType.int8]
     var rows: DynamicVector[StringRef]
 
     # takes ownership of the passed input
-    fn __init__(inout self, owned s: String, sep: StringRef = "\n"):
+    fn __init__(inout self, s: String, sep: StringRef = "\n"):
         let l = len(s)
-        self.contents = s ^
+        self.contents = DTypePointer[DType.int8].alloc(len(s))
         self.rows = DynamicVector[StringRef](10)
+        memcpy(self.contents, s._as_ptr(), len(s))
         var start: Int = 0
         while start < l:
             # Find next occurence of the separator
-            var end = start + self.contents.find(sep, start)
+            var end = start + s.find(sep, start)
             # Or the end
             if end < start:
                 end = l
             # Pre-create the StringRef's
-            self.rows.push_back(StringRef(self.contents._as_ptr().offset(start), end - start))
+            self.rows.push_back(StringRef(self.contents.offset(start), end - start))
             start = end + len(sep)
 
     # return view of the selected row / item
@@ -44,3 +45,6 @@ fn main():
     let b = Parser("abc, def; ghi; foo", "; ")
     for i in range(b.length()):
         print(b.get(i))
+    let c = Parser("10 20 3", " ")
+    for i in range(c.length()):
+        print(c.get(i))

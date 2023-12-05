@@ -1,6 +1,19 @@
 from algorithm import parallelize
+import time
 import benchmark
 
+fn minibench[fun: fn () capturing -> None](label: StringLiteral, loops: Int = 100, unit: StringLiteral = "ns"):
+    let start = time.now()
+    for _ in range(loops):
+        fun()
+    let end = time.now()
+    let avg = (end - start) / loops
+    var div = 1
+    if (unit == "μs"):
+        div = 1000
+    if (unit == "ms"):
+        div = 1000000
+    print(label, ":", avg / div, unit)
 
 fn run_multiline_task[f1: fn (Int, /) capturing -> None, f2: fn (Int, /) capturing -> None]
     (len: Int, disp: fn () capturing -> None, workers: Int = 12):
@@ -25,8 +38,9 @@ fn run_multiline_task[f1: fn (Int, /) capturing -> None, f2: fn (Int, /) capturi
     part1()
     part2()
     disp()
-
-    print("part1 :", benchmark.run[part1]().mean["ms"](), "ms")
-    print("part1_parallel:", benchmark.run[part1_parallel]().mean["ms"](), "ms")
-    print("part1 :", benchmark.run[part2]().mean["ms"](), "ms")
-    print("part2_parallel:", benchmark.run[part2_parallel]().mean["ms"](), "ms")
+    print("using",workers,"parallel threads")
+    minibench[part1]("part1", 1000, "ms")
+    minibench[part1_parallel]("part1 parallel", 1000, "ms")
+    minibench[part2]("part2", 1000, "ms")
+    minibench[part2_parallel]("part2 parallel", 1000, "ms")
+    

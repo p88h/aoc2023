@@ -1,11 +1,9 @@
 from parser import Parser
 from os.atomic import Atomic
 from utils.vector import DynamicVector
-from wrappers import run_multiline_task
+from wrappers import minibench
 from math import min, max
 from memory import memset
-from algorithm import parallelize
-import benchmark
 
 alias intptr = DTypePointer[DType.int32]
 
@@ -119,10 +117,10 @@ fn main() raises:
         print(sum2.value.to_int())
 
     # This part doesn't seem to benefit much from parallelization, so just run benchmarks.
-    print("parse:", benchmark.run[find_nums]().mean["ms"](), "ms")
-    print("part1:", benchmark.run[part1]().mean["ms"](), "ms")
+    minibench[find_nums]("parse", 1000, "ms")
+    minibench[part1]("part1", 1000, "ms")
     print(sum1)
-    print("part2:", benchmark.run[part2]().mean["ms"](), "ms")
+    minibench[part2]("part2", 1000, "ms")
     print(sum2)
 
     # Ensure `lines` and `nums` are still in use

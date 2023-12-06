@@ -8,8 +8,9 @@ def quadratic(t, d):
     delta = t * t - 4 * d
     if delta <= 0:
         return 0
-    x0 = math.ceil((t - math.sqrt(delta)) / 2)
-    x1 = math.floor((t + math.sqrt(delta)) / 2)
+    ds = math.sqrt(delta)
+    x0 = math.ceil((t - ds) / 2)
+    x1 = math.floor((t + ds) / 2)
     if x0 * (t - x0) == d:
         x0 += 1
     if x1 * (t - x1) == d:

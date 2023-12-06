@@ -68,4 +68,4 @@ find_nums()
 print(part1())
 print(part2())
 
-minibench({"parse": find_nums, "part1": part1, "part2": part2}, 1000)
+minibench({"parse": find_nums, "part1": part1, "part2": part2})

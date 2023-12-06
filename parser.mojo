@@ -25,7 +25,7 @@ struct Parser:
             if end < start:
                 end = l
             # ignore empty tokens                
-            if (start == end):
+            if start == end:
                 start += len(sep)
                 continue
             # Pre-create the StringRef's

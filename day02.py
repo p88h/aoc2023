@@ -41,4 +41,4 @@ def part2():
 print(part1())
 print(part2())
 
-minibench({"part1": part1, "part2": part2}, 1000)
+minibench({"part1": part1, "part2": part2})

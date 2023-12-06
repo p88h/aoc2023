@@ -110,10 +110,10 @@ fn main() raises:
             sum2 += cd
 
     # This part doesn't seem to benefit much from parallelization, so just run benchmarks.
-    minibench[parse]("parse", 1000, "ms")
-    minibench[part1]("part1", 1000, "μs")
+    minibench[parse]("parse")
+    minibench[part1]("part1")
     print(sum1)
-    minibench[part2]("part2", 1000, "μs")
+    minibench[part2]("part2")
     print(sum2)
 
     # Ensure `lines` and `games` are still in use

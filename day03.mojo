@@ -15,6 +15,7 @@ fn main() raises:
     let dimy = lines.length()
     # Here we'll keep all the found numbers - the format is POS_Y,POS_X,LENGTH,VALUE
     var nums = DynamicVector[Tuple[Int, Int, Int, Int]](1000)
+    var flat = DynamicVector[Int](100000)
     # And here we'll keep all the information about gears. We just keep a huge table
     # with enough space to have gears in all position of the board. No hashing - the
     # gear position _is_ the index into this array.
@@ -30,11 +31,14 @@ fn main() raises:
     @parameter
     fn find_nums():
         nums.clear()
+        flat.clear()
         for y in range(lines.length()):
             var r: Int = 0
             var q: Int = 0
+            let line: String = lines.get(y)
             for x in range(dimx):
-                let c = ord(lines.get(y)[x])
+                let c = line._buffer[x].to_int()
+                flat.push_back(c)
                 # char is in 0..9 range
                 if c >= 48 and c <= 57:
                     r = r * 10 + c - 48
@@ -64,9 +68,8 @@ fn main() raises:
         let ly = min(y + 1, dimy - 1)
         # Scan the box. This is rather fast in Mojo.
         for gy in range(sy, ly + 1):
-            let gl = lines.get(gy)
             for gx in range(sx, lx + 1):
-                let c = ord(gl[gx])
+                let c = flat[gy * dimx + gx]
                 # Not a number and not a dot
                 if (c < 48 or c > 57) and (c != 46):
                     sum1 += v
@@ -91,9 +94,8 @@ fn main() raises:
         let sy = max(y - 1, 0)
         let ly = min(y + 1, dimy - 1)
         for gy in range(sy, ly + 1):
-            let gl = lines.get(gy)
             for gx in range(sx, lx + 1):
-                if ord(gl[gx]) == 42:
+                if flat[gy * dimx + gx] == 42:
                     # If a star is found, look up its state (previously found neighbor value) in `gears`
                     let gk = (gy * dimy + gx)
                     # Apparently, there is never a gear with more than tow neighbors so this is sufficient
@@ -117,12 +119,13 @@ fn main() raises:
         print(sum2.value.to_int())
 
     # This part doesn't seem to benefit much from parallelization, so just run benchmarks.
-    minibench[find_nums]("parse", 1000, "ms")
-    minibench[part1]("part1", 1000, "ms")
+    minibench[find_nums]("parse")
+    minibench[part1]("part1")
     print(sum1)
-    minibench[part2]("part2", 1000, "ms")
+    minibench[part2]("part2")
     print(sum2)
 
     # Ensure `lines` and `nums` are still in use
     print(lines.length(), "rows")
     print(nums.size, "numbers")
+    print(flat.size, "cells")

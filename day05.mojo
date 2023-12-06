@@ -57,11 +57,11 @@ struct TransformStep(CollectionElement):
         print(")")
 
 
-fn atoi(s: StringRef) -> Int64:
+fn atoi(s: String) -> Int64:
     alias zero = 48
     var ret: Int64 = 0
-    for i in range(s.length):
-        ret = ret * 10 + ord(s[i]) - zero
+    for i in range(len(s)):
+        ret = ret * 10 + s._buffer[i].to_int() - zero
     return ret
 
 
@@ -163,10 +163,10 @@ fn main() raises:
             ret2.min(work[i].get[0, Int64]())
 
     # This part doesn't seem to benefit much from parallelization, so just run benchmarks.
-    minibench[parse]("parse", 1000, "ms")
-    minibench[part1]("part1", 1000, "μs")
+    minibench[parse]("parse")
+    minibench[part1]("part1")
     print(ret1)
-    minibench[part2]("part2", 1000, "μs")
+    minibench[part2]("part2")
     print(ret2)
 
     print(lines.length(), "rows")

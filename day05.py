@@ -21,7 +21,6 @@ def parse():
             continue
         if line[-1] == ":":
             cur.sort()
-            print(cur)
             steps.append(cur)
             cur = []
             continue
@@ -85,4 +84,4 @@ parse()
 print(part1())
 print(part2())
 
-minibench({"parse": parse, "part1": part1, "part2": part2}, 1000)
+minibench({"parse": parse, "part1": part1, "part2": part2})

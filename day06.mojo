@@ -34,8 +34,9 @@ fn quadratic(t: Int64, d: Int64) -> Int64:
     let delta: Int64 = t * t - 4 * d
     if delta <= 0:
         return 0
-    var x0 = (t - ssqrt(delta)) / 2
-    var x1 = (t + ssqrt(delta)) / 2
+    let ds = ssqrt(delta)
+    var x0 = (t - ds) / 2
+    var x1 = (t + ds) / 2
     if x0 * (t - x0) <= d:
         x0 += 1
     if x1 * (t - x1) <= d:
@@ -51,12 +52,12 @@ fn main() raises:
 
     @parameter
     fn part1():
-        let times = Parser(String(lines.get(0))[10:], " ")
-        let dist = Parser(String(lines.get(1))[10:], " ")
+        let times = Parser(lines.get(0), " ")
+        let dist = Parser(lines.get(1), " ")
         var s: Int64 = 1
-        for i in range(times.length()):
-            let t = atoi(String(times.get(i)))
-            let d = atoi(String(dist.get(i)))
+        for i in range(1,times.length()):
+            let t = atoi(times.get(i))
+            let d = atoi(dist.get(i))
             let q = quadratic(t, d)
             s *= q
         ret1 = s
@@ -67,8 +68,8 @@ fn main() raises:
         let d: Int64 = atoi(String(lines.get(1))[10:])
         ret2 = quadratic(t, d)
 
-    minibench[part1]("part1", 1000, "μs")
+    minibench[part1]("part1")
     print(ret1)
-    minibench[part2]("part2", 1000, "μs")
+    minibench[part2]("part2")
     print(ret2)
     print(lines.length(), "rows")

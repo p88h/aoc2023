@@ -24,6 +24,10 @@ struct Parser:
             # Or the end
             if end < start:
                 end = l
+            # ignore empty tokens                
+            if (start == end):
+                start += len(sep)
+                continue
             # Pre-create the StringRef's
             self.rows.push_back(StringRef(self.contents.offset(start), end - start))
             start = end + len(sep)

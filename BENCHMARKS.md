@@ -15,22 +15,22 @@ mojo 0.6.0 (d55c0025)
 ```
 
 ```
-Task                    Python      PyPy3       Mojo        Mojo parallel
-Day1 Part1 old/naive    0.81 ms    [0.18 ms]    0.35 ms     0.05 ms (x12)
-Day1 Part2 old/naive    8.92 ms    [0.89 ms]    1.21 ms     0.17 ms (x12)
-Day1 Part1 optimized    0.70 ms     0.14 ms    [0.10 ms]    0.03 ms (x24)
-Day1 Part2 optimized    2.86 ms     0.32 ms    [0.16 ms]    0.04 ms (x24)
-Day2 Part1              0.30 ms    [0.10 ms]    0.13 ms     0.04 ms (x24)
-Day2 Part2              0.30 ms    [0.10 ms]    0.13 ms     0.04 ms (x24)
-Day3 Parser             0.62 ms     0.04 ms    [0.03 ms]    n/a
-Day3 Part1              0.37 ms     0.04 ms    [6.85 μs]    n/a
-Day3 Part2              0.81 ms     0.05 ms    [0.01 ms]    n/a
-Day4 Parser             0.40 ms     0.22 ms    [0.07 ms]    n/a
-Day4 Part1              0.08 ms     0.04 ms    [0.95 μs]    n/a
-Day4 Part2              0.12 ms     0.05 ms    [1.05 μs]    n/a
-Day5 Parser             0.06 ms     0.05 ms    [0.03 ms]    n/a
-Day5 Part1              0.04 ms     3.81 μs    [1.88 μs]    n/a
-Day5 Part2              0.22 ms     0.10 ms    [6.47 μs]    n/a
-Day6 Part1              1.40 μs    [0.21 μs]    0.50 μs     n/a
-Day6 Part2              0.57 μs     0.20 μs    [0.10 μs]    n/a
+Task             Python      PyPy3       Mojo        Mojo parallel
+Day1 Part1      0.70 ms     0.14 ms    [6.23 μs]    0.02 ms (x24)
+Day1 Part2      2.86 ms     0.32 ms    [0.05 ms]    0.02 ms (x24)
+Day2 Part1      0.30 ms     0.10 ms    [0.03 ms]    9.59 μs (x24)
+Day2 Part2      0.30 ms     0.10 ms    [0.03 ms]    9.71 μs (x24)
+Day3 Parser     0.62 ms     0.04 ms    [0.03 ms]    n/a
+Day3 Part1      0.37 ms     0.04 ms    [5.35 μs]    n/a
+Day3 Part2      0.81 ms     0.05 ms    [0.01 ms]    n/a
+Day4 Parser     0.40 ms     0.22 ms    [0.04 ms]    n/a
+Day4 Part1      0.08 ms     0.04 ms    [0.23 μs]    n/a
+Day4 Part2      0.12 ms     0.05 ms    [0.43 μs]    n/a
+Day5 Parser     0.06 ms     0.05 ms    [9.73 μs]    n/a
+Day5 Part1      0.04 ms     3.81 μs    [1.76 μs]    n/a
+Day5 Part2      0.22 ms     0.10 ms    [5.53 μs]    n/a
+Day6 Part1      1.40 μs     0.21 μs    [0.10 μs]    n/a
+Day6 Part2      0.57 μs     0.20 μs    [0.04 μs]    n/a
+Day7 Part1      1.06 ms     0.48 ms    [0.05 ms]    n/a
+Day7 Part2      1.10 ms     0.50 ms    [0.05 ms]
 ```

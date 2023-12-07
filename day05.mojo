@@ -1,4 +1,4 @@
-from parser import Parser
+from parser import *
 from utils.vector import DynamicVector
 from math import min, max
 from wrappers import minibench
@@ -57,25 +57,15 @@ struct TransformStep(CollectionElement):
         print(")")
 
 
-fn atoi(s: String) -> Int64:
-    alias zero = 48
-    var ret: Int64 = 0
-    for i in range(len(s)):
-        ret = ret * 10 + s._buffer[i].to_int() - zero
-    return ret
-
-
 fn main() raises:
     let f = open("day05.txt", "r")
-    let lines = Parser(f.read())
+    let lines = make_parser[10](f.read())
     var transform = DynamicVector[TransformStep](10)
     var numbers = DynamicVector[Int64](20)
-    var ret1 = Atomic[DType.int64](0)
-    var ret2 = Atomic[DType.int64](0)
 
     @parameter
-    fn parse():
-        let s = Parser(lines.get(0), " ")
+    fn parse() -> Int64:
+        let s = make_parser[32](lines.get(0))
         numbers.clear()
         for i in range(1, s.length()):
             numbers.push_back(atoi(s.get(i)))
@@ -83,22 +73,23 @@ fn main() raises:
         var cur = TransformStep()
         for l in range(3, lines.length()):
             let line = lines.get(l)
-            if not line:
+            if not line.size:
                 continue
-            if line[line.length - 1] == ":":
+            if line[line.size - 1] == 58: # ":"
                 transform.push_back(cur ^)
                 cur = TransformStep()
             else:
-                let lp = Parser(line, " ")
+                let lp = make_parser[32](line)
                 let dst = atoi(lp.get(0))
                 let src = atoi(lp.get(1))
                 let rl = atoi(lp.get(2))
                 cur.append(src, dst, rl)
         transform.push_back(cur ^)
+        return transform.size
 
     # Take numbers of matches, exponentiate, sum up
     @parameter
-    fn part1():
+    fn part1() -> Int64:
         var work: DynamicVector[Int64] = numbers
         for si in range(transform.size):
             let step = transform[si]
@@ -120,13 +111,14 @@ fn main() raises:
                 if n >= 0:
                     next.append(n)
             work = next ^
-        ret1 = work[0]
+        var ret1 = work[0]
         for i in range(work.size):
-            ret1.min(work[i])
+            ret1 = min(ret1, work[i])
+        return ret1
 
     # Computes the ticket counts in draws table on the go
     @parameter
-    fn part2():
+    fn part2() -> Int64:
         var work = DynamicVector[Tuple[Int64, Int64]](numbers.size // 2)
         for i in range(numbers.size // 2):
             work.push_back((numbers[2 * i], numbers[2 * i] + numbers[2 * i + 1] - 1))
@@ -158,16 +150,16 @@ fn main() raises:
                 if a <= b:  # some was left untranslated
                     next.push_back((a, b))
             work = next ^
-        ret2 = work[0].get[0, Int64]()
+        var ret2 = work[0].get[0, Int64]()
         for i in range(work.size):
-            ret2.min(work[i].get[0, Int64]())
+            ret2 = min(ret2, work[i].get[0, Int64]())
+        return ret2
+
 
     # This part doesn't seem to benefit much from parallelization, so just run benchmarks.
     minibench[parse]("parse")
     minibench[part1]("part1")
-    print(ret1)
     minibench[part2]("part2")
-    print(ret2)
 
     print(lines.length(), "rows")
     print(numbers.size, "numbers")

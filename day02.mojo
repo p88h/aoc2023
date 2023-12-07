@@ -1,4 +1,4 @@
-from parser import Parser
+from parser import *
 from os.atomic import Atomic
 from utils.vector import DynamicVector
 from wrappers import run_multiline_task
@@ -30,8 +30,8 @@ struct PseudoDict:
     # Our dictionary has only an update maximum operation, put_max
     # 97 == ord('a'). Could have used a constant, but, you can't have
     # let fields in structs, and not sure if even then it would be treated as const.
-    fn put_max(inout self, s: String, v: Int):
-        let id = (s._buffer[0] - ord_a).to_int()
+    fn put_max(inout self, s: StringSlice, v: Int):
+        let id = (s[0] - ord_a).to_int()
         if self.vals[id] < v:
             self.vals[id] = v
 
@@ -41,36 +41,32 @@ struct PseudoDict:
         return self.vals[id]
 
 
-fn maxdict(s: String) -> PseudoDict:
+fn maxdict(s: StringSlice) -> PseudoDict:
     """
     Parse a single line and return a dictionary with maximum values for each ball color
     across all the draws. Internally uses hierarchical parsing to split off the header,
     split draws, and then split colors.
     """
     # Skip header. Game IDs are sequential, anyway.
-    let start = s.find(": ") + 2
+    let start = s.find(58) + 2 # ':'
     # Top-level parser for draws - semicolon separated
-    let draws = Parser(s[start:], "; ")
+    let draws = make_parser[59](s[start:]) # ';'
     var mballs = PseudoDict()
     for d in range(draws.length()):
         # Secondary level parser for comma-separated colors
-        let colors = Parser(draws.get(d), ", ")
+        let colors = make_parser[44](draws.get(d)) # ','
         for b in range(colors.length()):
-            let tok = String(colors.get(b))
             # split color name and value
-            let p = tok.find(" ")
-            try:  # for atol
-                let v = atol(tok[:p])
-                let col = tok[p + 1 :]
-                mballs.put_max(col, v)
-            except e:
-                pass
+            let tok = make_parser[32](colors.get(b))
+            let v = atoi(tok.get(0))
+            let col = tok.get(1)
+            mballs.put_max(col, v.to_int())
     return mballs ^
 
 
 fn main() raises:
     let f = open("day02.txt", "r")
-    let lines = Parser(f.read())
+    let lines = make_parser[10](f.read())
     var sum1 = Atomic[DType.int32](0)
     var sum2 = Atomic[DType.int32](0)
 

@@ -1,4 +1,4 @@
-from parser import Parser
+from parser import *
 from os.atomic import Atomic
 from utils.vector import DynamicVector
 from math import min, max
@@ -36,16 +36,13 @@ fn matches(t: Tuple[SIMD[DType.uint8, 16], SIMD[DType.uint8, 16]]) -> Int:
 @always_inline
 fn main() raises:
     let f = open("day04.txt", "r")
-    let lines = Parser(f.read())
+    let lines = make_parser[10](f.read())
 
     let count = lines.length()
     # Each game is represented as two 128bit numbers, stored as 16-byte SIMD vectors
     var games = DynamicVector[Tuple[SIMD[DType.uint8, 16], SIMD[DType.uint8, 16]]](count)
     # Counts number of instances of each ticket
     var draws = intptr.alloc(count)
-    # Result counters (not parallelizing this though)
-    var sum1 = Atomic[DType.int32](0)
-    var sum2 = Atomic[DType.int32](0)
 
     # Set a single bit in a 8-bit based bitfield
     @always_inline
@@ -55,66 +52,69 @@ fn main() raises:
         m[f] = m[f] | (1 << b)
 
     # Build a bitfield from a string containing integers
-    fn bitfield(s: String) -> SIMD[DType.uint8, 16]:
+    fn bitfield(s: StringSlice) -> SIMD[DType.uint8, 16]:
         var ret = SIMD[DType.uint8, 16](0)
         var pos = 0
-        let l = len(s)
+        let l = s.size
         var r = 0
         while pos < l:
-            if s._buffer[pos] != space:
-                r = r * 10 + s._buffer[pos].to_int() - zero
+            if s[pos] != space:
+                r = r * 10 + s[pos].to_int() - zero
             elif r > 0:
                 setbit(ret, r)
                 r = 0
             pos += 1
+        if r > 0:
+            setbit(ret, r)
+            r = 0
         return ret
 
     # Scan each game, split it into winning numbers and store as bit vectors
     @parameter
-    fn parse():
+    fn parse() -> Int64:
         games.clear()
         for y in range(lines.length()):
-            var s: String = lines.get(y)
+            let s: StringSlice = lines.get(y)
             # achievement unlocked: https://github.com/modularml/mojo/issues/1367
             # the below doesn't work. We'll need to live with multiple spaces.
             # s = s.replace("  ", " ") + " "
-            s = s + " "
-            let start = s.find(": ") + 2
-            let sep = s.find("| ")
-            let s1 = s[start:sep]
-            let s2 = s[sep + 2 : len(s)]
+            let start = s.find(58)# ':'
+            let sep = s.find(124) # '|'
+            let s1 = s[start + 2:sep]
+            let s2 = s[sep + 2:]
             games.push_back((bitfield(s1), bitfield(s2)))
+        return games.size
 
     # Take numbers of matches, exponentiate, sum up
     @parameter
-    fn part1():
-        sum1 = 0
+    fn part1() -> Int64:
+        var sum1 = 0
         for i in range(games.size):
             let w = 1 << matches(games[i])
             sum1 += w >> 1
+        return sum1
 
     # Computes the ticket counts in draws table on the go
     @parameter
-    fn part2():
+    fn part2() -> Int64:
         # Achievement #2 - memset with anything else than 0 doesn't work
         # https://github.com/modularml/mojo/issues/1368
         # We set ticket counts to zero then.
         memset(draws, 0, count)
-        sum2 = 0
+        var sum2 : Int64 = 0
         for i in range(count):
-            let cd = draws.load(i) + 1
+            let cd = draws[i] + 1
             let x = matches(games[i])
             # Update next x draws
             for j in range(i + 1, min(count, i + x + 1)):
-                draws.store(j, draws.load(j) + cd)
-            sum2 += cd
+                draws[j] += cd
+            sum2 += cd.to_int()
+        return sum2
 
     # This part doesn't seem to benefit much from parallelization, so just run benchmarks.
     minibench[parse]("parse")
     minibench[part1]("part1")
-    print(sum1)
     minibench[part2]("part2")
-    print(sum2)
 
     # Ensure `lines` and `games` are still in use
     print(lines.length(), "rows")

@@ -1,4 +1,4 @@
-from parser import Parser
+from parser import *
 from os.atomic import Atomic
 from utils.vector import DynamicVector
 from wrappers import run_multiline_task
@@ -54,7 +54,7 @@ struct MultiMatcher:
 
 fn main() raises:
     let f = open("day01.txt", "r")
-    let p = Parser(f.read())
+    let p = make_parser[10](f.read())
     # Since we want the parallel code to work correctly, we store the sums in atomic integers
     var a1 = Atomic[DType.int32](0)
     var a2 = Atomic[DType.int32](0)
@@ -69,14 +69,14 @@ fn main() raises:
         var d1 = 0
         var d2 = 0
         # Check forward to find first digit
-        for i in range(len(s)):
-            let c = ord(s[i])
+        for i in range(s.size):
+            let c = s[i].to_int()
             if c >= zero and c <= nine:
                 d1 = c - zero
                 break
         # Check backward to find last digit
-        for i in range(len(s) - 1, -1, -1):
-            let c = ord(s[i])
+        for i in range(s.size - 1, -1, -1):
+            let c = s[i].to_int()
             if c >= zero and c <= nine:
                 d2 = c - zero
                 break
@@ -111,11 +111,8 @@ fn main() raises:
         var d2 = 0
         # last four characters code
         var l4: Int32 = 0
-        for i in range(len(s)):
-            # Another fun fact, since the Parser tries not to re-create all strings, it uses StringRefs.
-            # StringRefs _don't_ have an exposed buffer and don't have _as_ptr() function so you cannot
-            # access the character buffer. Will probably need to write my own StringView.
-            let c = ord(s[i])
+        for i in range(s.size):
+            let c = s[i].to_int()
             var d = -1
             if c >= zero and c <= nine:
                 d = c - zero
@@ -127,8 +124,8 @@ fn main() raises:
                 d1 = d
                 break
         l4 = 0
-        for i in range(len(s) - 1, -1, -1):
-            let c = ord(s[i])
+        for i in range(s.size - 1, -1, -1):
+            let c = s[i].to_int()
             var d = -1
             if c >= zero and c <= nine:
                 d = c - zero
@@ -153,3 +150,5 @@ fn main() raises:
     # While this looks like debug info, Mojo actually sometimes forgets I need the parser in all these step
     # tasks, and happily crashes rather than keeping it around. This holds it in place until that happens.
     print(p.length(), "rows")
+    print(m.pfx.size, "prefixes")
+    print(r.pfx.size, "rprefixes")

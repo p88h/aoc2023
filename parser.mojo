@@ -3,6 +3,11 @@ from utils.vector import DynamicVector
 
 @value
 struct StringSlice(CollectionElement, Stringable):
+    """
+    Represents a view of some string, with basic access primitives. 
+    Since it's a @value, it also automatically implements @CollectionElement 
+    which is nice - no extra boilerplate needed.
+    """
     var ptr: DTypePointer[DType.int8]
     var size: Int
 
@@ -28,7 +33,7 @@ struct StringSlice(CollectionElement, Stringable):
         return StringSlice(self.ptr.offset(idxs.start), end - idxs.start)
 
 
-# Custom string-to-int which skips spaces
+# Custom string-to-int which skips spaces, and works on StringSlices
 fn atoi(s: StringSlice) -> Int64:
     alias zero = 48
     alias space = 32
@@ -88,6 +93,8 @@ struct Parser:
         return self.rows.size
 
 
+# Since constructors cannot be parametrized, passing the const separator via
+# a helper function. Need two of those for each of the source types. 
 fn make_parser[sep: Int8](s: String) -> Parser:
     var p = Parser(s)
     p.parse[sep]()

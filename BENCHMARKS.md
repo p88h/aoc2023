@@ -32,5 +32,5 @@ Day5 Part2      0.22 ms     0.10 ms    [5.53 μs]    n/a
 Day6 Part1      1.40 μs     0.21 μs    [0.10 μs]    n/a
 Day6 Part2      0.57 μs     0.20 μs    [0.04 μs]    n/a
 Day7 Part1      1.06 ms     0.48 ms    [0.05 ms]    n/a
-Day7 Part2      1.10 ms     0.50 ms    [0.05 ms]
+Day7 Part2      1.10 ms     0.50 ms    [0.05 ms]    n/a
 ```

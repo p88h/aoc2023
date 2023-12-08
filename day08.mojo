@@ -116,10 +116,6 @@ fn main() raises:
             z = lcm(z, results[l])
         return z
 
-    _ = parse()
-    print(part1())
-    print(part2())
-    print(part2_parallel())
     minibench[parse]("parse")
     minibench[part1]("part1")
     minibench[part2]("part2")

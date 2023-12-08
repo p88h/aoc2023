@@ -1,6 +1,7 @@
 from math import lcm
 from benchy import minibench
 
+
 class Game:
     def __init__(self, rules):
         self.D = {}
@@ -25,16 +26,18 @@ lines = open("day08.txt").read().split("\n")
 g = None
 ins = lines[0]
 
+
 def parse():
     global g
     g = Game(lines[2:])
     return len(g.D)
 
+
 def part1():
     s = 0
     m = len(ins)
-    id = g.D['AAA']
-    fin = g.D['ZZZ']
+    id = g.D["AAA"]
+    fin = g.D["ZZZ"]
     while id != fin:
         c = ins[s % m]
         if c == "L":
@@ -60,6 +63,7 @@ def part2():
             s = s + 1
         z = lcm(z, s)
     return z
+
 
 parse()
 print(part1())

@@ -6,14 +6,12 @@ alias simd_width_u32 = simdwidthof[DType.int32]()
 
 
 struct SymSolver:
-    """
-    A vector of symbolic vectors, representing up to 32 variables with +/- operations.
-    """
-
+    # A vector of up to 32 symbolic vectors, representing up to 32 variables. 
+    # We need the number to be a power of two to make the SIMD code simpler.
     var syms: DTypePointer[DType.int32]
     var size: Int
 
-    # initialize and set the diagonal to value
+    # initialize and set the values to an 'identity matrix' of sorts.
     fn __init__(inout self, count: Int):
         self.syms = DTypePointer[DType.int32].aligned_alloc(32, count * 32)
         self.size = count
@@ -23,16 +21,24 @@ struct SymSolver:
             self.syms.aligned_simd_store[32, 32](i * 32, s)
 
     # Computes the grid and returns the flat multiplier array (and it's mirror image)
-    fn compute(inout self) -> Tuple[SIMD[DType.int32, 32], SIMD[DType.int32, 32]]:
+    fn compute(inout self) -> Tuple[SIMD[DType.int32, 32], SIMD[DType.int32, 32]]:        
         var f = SIMD[DType.int32, 32](0)
-        var r = SIMD[DType.int32, 32](0)
+        # This is exactly the same as the specified problem, but working on 'symbolic' numbers
+        # The math is the same, though, just instead of adding individual values, we do 32 at a time
         for k in range(self.size):
+            # previous item
             var p = self.syms.aligned_simd_load[32, 32](0)
             for i in range(self.size - k - 1):
+                # next item
                 let n = self.syms.aligned_simd_load[32, 32](i * 32 + 32)
+                # compute diff and store back
                 self.syms.aligned_simd_store[32, 32](i * 32, n - p)
                 p = n
+            # add the last element to our formula
             f += p
+        # Compute the flipped version of the formula for the part 2
+        # (you could flip the data matrix, but that's way more expensive)
+        var r = SIMD[DType.int32, 32](0)
         for i in range(self.size):
             r[i] = f[self.size - i - 1]
         return (f, r)
@@ -63,6 +69,7 @@ struct VecMatrix:
     # parse and store an input line as a column in the matrix
     fn add_row(inout self, s: StringSlice):
         let p = make_parser[32](s)
+        # When storing data, we just pad everything to 32, no SIMD here
         for i in range(p.length()):
             self.nums[self.rows * 32 + i] = atoi(p.get(i)).to_int()
         self.rows += 1
@@ -71,6 +78,11 @@ struct VecMatrix:
     fn fma(self, mult: SIMD[DType.int32, 32]) -> Int:
         var acc = SIMD[DType.int32, 32](0)
         for i in range(self.rows):
+            # multiply the whole row by the whole formula in one go
+            # (well, not really one op, unless you have 1024-bit SIMD operations.
+            # Mojo doesn't even do AVX512, so this breaks down to 4x8-wide ops with AVX2.
+            # Or equivalent. Manually doing 3x8 is a tiny bit faster but too
+            # complicated)
             acc += self.nums.aligned_simd_load[32, 32](i * 32) * mult
         return acc.reduce_add().to_int()
 

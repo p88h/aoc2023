@@ -1,3 +1,4 @@
+.vscode/
 __pycache__/
 /tmp/
 *.py[cod]
@@ -6,3 +7,4 @@ __pycache__/
 *.ttf
 *.txt
 tempCodeRunnerFile.*
+

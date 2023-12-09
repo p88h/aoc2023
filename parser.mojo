@@ -37,12 +37,16 @@ struct StringSlice(CollectionElement, Stringable):
 fn atoi(s: StringSlice) -> Int64:
     alias zero = 48
     alias space = 32
+    alias minus = 45
     var ret: Int = 0
+    var sign: Int = 1
     for i in range(s.size):
         let c = s.ptr[i].to_int()
-        if c != space:
+        if c == minus:
+            sign = -1
+        elif c != space:
             ret = ret * 10 + c - zero
-    return ret
+    return ret * sign
 
 
 struct Parser:

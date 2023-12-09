@@ -36,6 +36,9 @@ Day7 Part2      1.79 ms     0.77 ms    [0.13 ms]    n/a             * 5 - 13
 Day8 Parse      0.26 ms     0.11 ms    [2.97 μs]    n/a             * 36 - 86
 Day8 Part1      0.77 ms     0.10 ms    [0.03 ms]    n/a             * 3 - 23
 Day8 Part2      7.09 ms     1.93 ms    [0.25 ms]    0.09 ms (x6)    * 21 - 78 ' 
+Day9 Parser     0.30 ms     0.12 ms    [0.07 ms]    n/a             * 2-4               
+Day9 Part1      1.93 ms     0.21 ms    [3.37 μs]    n/a             * 62 - 570
+Day9 Part2      2.06 ms     0.20 ms    [3.17 μs]    n/a             * 63 - 650
 
 ' - uses parallel version (faster) as comparison
 '' - uses non-parallel version (faster) as comparison

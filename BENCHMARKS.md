@@ -36,4 +36,8 @@ Day7 Part2      1.10 ms     0.50 ms    [0.05 ms]    n/a
 Day8 Parse      0.15 ms     0.06 ms    [2.75 μs]    n/a
 Day8 Part1      0.46 ms     0.05 ms    [0.02 ms]    n/a
 Day8 Part2      4.38 ms     1.29 ms    [0.17 ms]    0.04 ms (x6)
+Task             Python      PyPy3       Mojo        Mojo parallel  * vs PyPy3 / Python
+Day9 Parser     0.19 ms     0.07 ms    [0.03 ms]    n/a             * 2 - 6
+Day9 Part1      1.28 ms     0.14 ms    [2.05 μs]    n/a             * 68 - 620
+Day9 Part2      1.30 ms     0.14 ms    [2.05 μs]    n/a             * 68 - 630
 ```

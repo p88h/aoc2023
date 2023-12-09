@@ -39,4 +39,7 @@ Day8 Part2      4.38 ms     1.29 ms    [0.17 ms]    0.04 ms     * 32 - 109
 Day9 Parser     0.19 ms     0.07 ms    [0.03 ms]    n/a         * 2 - 6
 Day9 Part1      1.28 ms     0.14 ms    [2.05 μs]    n/a         * 68 - 620
 Day9 Part2      1.30 ms     0.14 ms    [2.05 μs]    n/a         * 68 - 630
+Day9sym Prep    0.34 ms     0.08 ms    [0.03 ms]    n/a         * 2 - 6
+Day9sym Part1   0.11 ms     3.61 μs    [0.16 μs]    n/a         * 22 - 687
+Day9sym Part2   0.14 ms     4.95 μs    [0.16 μs]    n/a         * 30 - 875
 ```

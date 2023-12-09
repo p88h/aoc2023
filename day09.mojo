@@ -1,6 +1,5 @@
 from parser import *
 from wrappers import minibench
-from algorithm import vectorize
 from memory import memset
 
 alias simd_width_u32 = simdwidthof[DType.int32]()
@@ -12,6 +11,7 @@ struct Matrix2D:
     var rows: Int
     var cols: Int
 
+    # blank initializer
     fn __init__(inout self, w: Int, h: Int):
         # ensure everything is 8-padded.
         self.rows = w
@@ -19,6 +19,7 @@ struct Matrix2D:
         self.nums = DTypePointer[DType.int32].aligned_alloc(64, self.rows * self.cols)
         memset(self.nums, 0, self.rows * self.cols)
 
+    # override copy constructor to also copy memory
     fn __copyinit__(inout self, other: Self):
         self.rows = other.rows
         self.cols = other.cols
@@ -28,12 +29,13 @@ struct Matrix2D:
     fn __del__(owned self):
         self.nums.free()
 
+    # parse and store an input line as a column in the matrix
     fn store_column(inout self, x: Int, s: StringSlice):
         let p = make_parser[32](s)
         for i in range(p.length()):
             self.nums[self.cols * i + x] = atoi(p.get(i)).to_int()
 
-    # computes the differential, leaving last row intact (used in the final pass)
+    # computes the differential, from top to bottown, leaving last row intact (used in the final pass)
     fn reduce_down(inout self, rows: Int):
         for ofs in range(self.cols // simd_width_u32):
             var prev = self.nums.aligned_simd_load[simd_width_u32, 64](ofs * simd_width_u32)
@@ -74,6 +76,7 @@ struct Matrix2D:
             tot += prev
         return tot.reduce_add().to_int()
 
+    # for debugging
     fn print(self, y: Int):
         for i in range(self.rows):
             print_no_newline(self.nums[i * self.cols + y], "")

@@ -1,6 +1,5 @@
 from utils.vector import DynamicVector
 
-
 @value
 struct StringSlice(CollectionElement, Stringable):
     """
@@ -78,6 +77,9 @@ struct Parser:
         self.contents = other.contents ^
         self.rows = other.rows ^
         self.size = other.size
+
+    fn __getitem__(self, idx: Int) -> StringSlice:
+        return self.rows[idx]
 
     fn parse[sep: Int8](inout self):
         var start: Int = 0

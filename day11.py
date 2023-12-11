@@ -4,25 +4,18 @@ lines = open("day11.txt").read().split("\n")
 
 def compute(cosmic_constant):
     # initializers for blank space detection
-    vexp = [0] * len(lines)
-    hexp = [0] * len(lines[0])
-    vsum = [0] * len(lines)
-    hsum = [0] * len(lines[0])
-    # find empty lines
+    vexp = [cosmic_constant] * len(lines)
+    hexp = [cosmic_constant] * len(lines[0])
+    # find empty lines, eliminate
     for i in range(len(lines)):
         for j in range(len(lines[i])):
-            hsum[j] |= ord(lines[i][j])
-            vsum[i] |= ord(lines[i][j])
-    # compute h & v expansion
-    for i in range(len(vsum)):
-        if vsum[i] == ord("."):
-            vexp[i] = vexp[i - 1] + cosmic_constant
-        else:
-            vexp[i] = vexp[i - 1]
-        if hsum[i] == ord("."):
-            hexp[i] = hexp[i - 1] + cosmic_constant
-        else:
-            hexp[i] = hexp[i - 1]
+            if lines[i][j] == '#':
+                hexp[j]=vexp[i]=0
+    # sum up
+    for i in range(1, len(hexp)):
+        hexp[i] += hexp[i-1]
+    for i in range(1, len(vexp)):
+        vexp[i] += vexp[i-1]    
 
     # initializers for space sweeper
     psum = [0] * len(lines[0])
@@ -33,8 +26,6 @@ def compute(cosmic_constant):
     vtot = 0  # total sum of flipped coordinates
     stot = 0  # total count of all stars
     for i in range(len(lines)):
-        if i > 0:
-            vsum[i] = vsum[i - 1]
         pst = 0  # sum of coordinates in the left-up quadrant
         lct = 0  # count of stars in the quadrant
         nst = 0  # sum of flipped coordinates

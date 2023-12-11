@@ -41,8 +41,8 @@ Day9sym Part1   0.11 ms     3.61 μs    [0.16 μs]    n/a         * 22 - 687
 Day9sym Part2   0.14 ms     4.95 μs    [0.16 μs]    n/a         * 30 - 875
 Day10 Part1     1.76 ms     0.58 ms    [0.08 ms]    n/a         * 7 - 22
 Day10 Part2     1.23 ms     0.47 ms    [0.04 ms]    0.015 ms    * 31 - 82
-Day11 Part1     1.94 ms     0.14 ms    [0.02 ms]    n/a         * 5 - 80
-Day11 Part2     1.95 ms     0.14 ms    [0.02 ms]    n/a         * 5 - 80
+Day11 Part1     1.19 ms     0.19 ms    [0.02 ms]    n/a         * 5 - 80
+Day11 Part2     1.24 ms     0.19 ms    [0.02 ms]    n/a         * 5 - 80
 
 TOTAL          15.68 ms     4.16 ms    [0.62 ms]    n/a         * 6 - 25
 ```

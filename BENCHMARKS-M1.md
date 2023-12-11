@@ -42,8 +42,10 @@ Day9 Part2      2.06 ms     0.20 ms    [3.17 μs]    n/a         * 63 - 650
 Day9sym Prep    0.53 ms     0.14 ms    [0.07 ms]    n/a         * 2 - 7
 Day9sym Part1   0.17 ms     6.85 μs    [0.18 μs]    n/a         * 38 - 944
 Day9sym Part2   0.23 ms     7.50 μs    [0.18 μs]    n/a         * 41 - 1277
-Day10 Part1     4.49 ms     2.83 ms    [0.27 ms]    n/a         * 11 - 17
-Day10 Part2     1.78 ms     0.76 ms    [0.04 ms]    0.02 ms     * 25 - 59
+Day10 Part1     2.58 ms     1.06 ms    [0.13 ms]    n/a         * 8 - 19
+Day10 Part2     1.77 ms     0.74 ms    [0.04 ms]    0.02 ms     * 37 - 88
+Day11 Part1     3.11 ms     0.14 ms    [0.04 ms]    n/a         * 3 - 77
+Day11 Part2     3.19 ms     0.14 ms    [0.04 ms]    n/a         * 3 - 79
 
 ' - uses parallel version (faster) as comparison
 '' - uses non-parallel version (faster) as comparison

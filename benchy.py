@@ -6,7 +6,7 @@ def minibench(fns, loops=100):
     for key in fns:
         sloop = loops // 10
         start = end = 0
-        while end - start < 1:
+        while end - start < 3:
             sloop *= 10
             start = time.time()
             t = 0

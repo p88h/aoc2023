@@ -53,4 +53,4 @@ print(flat)
 print(part1())
 print(part2())
 
-minibench({"prep": prep, "part1": part1, "part2": part2})
+minibench({"parse": prep, "part1": part1, "part2": part2})

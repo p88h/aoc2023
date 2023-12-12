@@ -26,24 +26,34 @@ for f in glob.glob("all_*.txt"):
             mat[row][order[col+suf]*2]=float(time)
             mat[row][order[col+suf]*2+1]=unit
 
+
 sums = [0] * 3
 for row in sorted(mat):
     label = row.replace("day","Day").replace("_", " ")
     raw = []
     for i in range(4):
-        if mat[row][2*i] == math.nan:
+        if math.isnan(mat[row][2*i]):
             continue
-        if mat[row][2*i+1] == "μs":
+        # convert everything to microseconds
+        unit = mat[row][2*i+1]
+        if unit == "μs":
             raw.append(mat[row][2*i])
-        else:
+        elif unit == "ms":
             raw.append(mat[row][2*i]*1000)
+        elif unit == "s":
+            raw.append(mat[row][2*i]*1000000)
+        elif unit == "ns":
+            raw.append(mat[row][2*i]/1000)
+        else:
+            print("BORK BORK BORK:", label, row, unit, mat[row][2*i])
+            exit(0)
         if i < 3:
             sums[i] += raw[i]
     if len(raw) > 3 and raw[3] < raw[2]:
         raw[2] = raw[3]
     r1 = int(raw[1] / raw[2])
     r2 = int(raw[0] / raw[2])
-    print("{0:<16s}{1:01.2f} {2}     {3:01.2f} {4}     {5:01.2f} {6}     {7:01.2f} {8}     * {9} - {10}".format(label,*mat[row],r1,r2))
+    print("{0:<16s}{1:01.2f} {2:<2s}     {3:01.2f} {4:<2s}     {5:01.2f} {6:<2s}     {7:01.2f} {8:<2s}     * {9} - {10}".format(label,*mat[row],r1,r2))
     #print(label, mat[row])
 
 tr1 = int(sums[1] / sums[2])
@@ -56,5 +66,5 @@ totf.append(math.nan)
 totf.append("   ")
 
 print()
-print("{0:<15s}{1:>2.2f} {2}     {3:>2.2f} {4}     {5:>2.2f} {6}     {7:01.2f} {8}     * {9} - {10}".format("Total",*totf,tr1,tr2))
+print("{0:<13s}{1:>7.2f} {2}   {3:>6.2f} {4}    {5:>5.2f} {6}   {7:5.2f} {8}     * {9} - {10}".format("Total",*totf,tr1,tr2))
     

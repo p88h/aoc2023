@@ -13,8 +13,8 @@ struct StringSlice(CollectionElement, Stringable):
     fn get(self) -> StringRef:
         return StringRef(self.ptr, self.size)
 
-    fn find(self, what: Int8) -> Int:
-        for i in range(self.size):
+    fn find(self, what: Int8, start: Int = 0) -> Int:
+        for i in range(start, self.size):
             if self.ptr[i] == what:
                 return i
         return -1
@@ -58,38 +58,38 @@ struct Parser:
     # need to hold these
     var contents: DTypePointer[DType.int8]
     var rows: DynamicVector[StringSlice]
-    var size: Int
+    var ptr_size: Int
 
     # Parse a string with a fixed char delimiter
     fn __init__(inout self, s: String):
-        self.size = len(s)
-        self.contents = DTypePointer[DType.int8].alloc(self.size)
+        self.ptr_size = len(s)
+        self.contents = DTypePointer[DType.int8].alloc(self.ptr_size)
         self.rows = DynamicVector[StringSlice](10)
-        memcpy(self.contents, s._as_ptr(), self.size)
+        memcpy(self.contents, s._as_ptr(), self.ptr_size)
 
     # Re-parse another StringSlice with a fixed-char delimiter
     fn __init__(inout self, s: StringSlice):
         self.contents = s.ptr
         self.rows = DynamicVector[StringSlice](4)
-        self.size = s.size
+        self.ptr_size = s.size
 
     fn __moveinit__(inout self, owned other: Self):
         self.contents = other.contents ^
         self.rows = other.rows ^
-        self.size = other.size
+        self.ptr_size = other.ptr_size
 
     fn __getitem__(self, idx: Int) -> StringSlice:
         return self.rows[idx]
 
     fn parse[sep: Int8](inout self):
         var start: Int = 0
-        for i in range(self.size):
+        for i in range(self.ptr_size):
             if self.contents[i] == sep:
                 if i != start:
                     self.rows.push_back(StringSlice(self.contents.offset(start), i - start))
                 start = i + 1
-        if start < self.size - 1:
-            self.rows.push_back(StringSlice(self.contents.offset(start), self.size - start))
+        if start < self.ptr_size:
+            self.rows.push_back(StringSlice(self.contents.offset(start), self.ptr_size - start))
 
     # return view of the selected row / item
     fn get(self, row: Int) -> StringSlice:
@@ -135,3 +135,8 @@ fn main():
     let e = make_parser[32](d.get(0))
     for i in range(e.length()):
         print(e.get(i).get())
+
+    let n = make_parser[32]("1 2 3")
+    for i in range(n.length()):
+        print(atoi(n[i]))
+

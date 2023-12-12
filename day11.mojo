@@ -1,24 +1,6 @@
 from parser import *
 from wrappers import minibench
-from memory import memset
-
-struct Array[AType: DType]:
-    var data: DTypePointer[AType]
-    var size: Int
-    fn __init__(inout self, size: Int):
-        self.data = DTypePointer[AType].aligned_alloc(4, size)
-        self.size = size
-        memset(self.data, 0, size)
-    
-    fn __getitem__(self, idx: Int) -> SIMD[AType, 1]:
-        return self.data[idx]
-
-    fn __setitem__(inout self, idx: Int, val : SIMD[AType, 1]):
-        self.data[idx] = val
-    
-    fn __del__(owned self):
-        self.data.free()
-
+from array import Array
 
 fn main() raises:
     let f = open("day11.txt", "r")

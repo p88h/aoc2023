@@ -100,7 +100,7 @@ fn heapsort(inout arr: DynamicVector[Int]):
 
 fn main() raises:
     let f = open("day07.txt", "r")
-    let tokens = make_parser[32](f.read().replace("\n", " "))
+    let tokens = make_parser[' '](f.read().replace("\n", " "))
     var ret1 = Atomic[DType.int64](0)
     var ret2 = Atomic[DType.int64](0)
     var mapp = Pointer[Int].alloc(128)

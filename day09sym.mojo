@@ -68,7 +68,7 @@ struct VecMatrix:
 
     # parse and store an input line as a column in the matrix
     fn add_row(inout self, s: StringSlice):
-        let p = make_parser[32](s)
+        let p = make_parser[' '](s)
         # When storing data, we just pad everything to 32, no SIMD here
         for i in range(p.length()):
             self.nums[self.rows * 32 + i] = atoi(p.get(i)).to_int()
@@ -89,8 +89,8 @@ struct VecMatrix:
 
 fn main() raises:
     let f = open("day09.txt", "r")
-    let lines = make_parser[10](f.read())
-    let first = make_parser[32](lines.get(0))
+    let lines = make_parser['\n'](f.read())
+    let first = make_parser[' '](lines.get(0))
     var mat = VecMatrix(lines.length(), first.length())
     var flat = SIMD[DType.int32, 32](0)
     var talf = SIMD[DType.int32, 32](0)

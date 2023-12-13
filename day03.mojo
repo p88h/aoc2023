@@ -10,7 +10,7 @@ alias intptr = DTypePointer[DType.int32]
 
 fn main() raises:
     let f = open("day03.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
     let dimx = lines.get(0).size
     let dimy = lines.length()
     # Here we'll keep all the found numbers - the format is POS_Y,POS_X,LENGTH,VALUE

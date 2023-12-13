@@ -4,7 +4,7 @@ from array import Array
 
 fn main() raises:
     let f = open("day11.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
 
     @parameter
     fn compute(cosmic_constant: Int64) -> Int64:

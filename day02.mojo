@@ -4,7 +4,7 @@ from utils.vector import DynamicVector
 from wrappers import run_multiline_task
 
 # Replaces ord('a')
-alias ord_a = 97
+alias ord_a = ord('a')
 
 
 struct PseudoDict:
@@ -28,8 +28,6 @@ struct PseudoDict:
         self.vals = existing.vals ^
 
     # Our dictionary has only an update maximum operation, put_max
-    # 97 == ord('a'). Could have used a constant, but, you can't have
-    # let fields in structs, and not sure if even then it would be treated as const.
     fn put_max(inout self, s: StringSlice, v: Int):
         let id = (s[0] - ord_a).to_int()
         if self.vals[id] < v:
@@ -48,16 +46,17 @@ fn maxdict(s: StringSlice) -> PseudoDict:
     split draws, and then split colors.
     """
     # Skip header. Game IDs are sequential, anyway.
-    let start = s.find(58) + 2 # ':'
+    alias cOlon = ord(':')
+    let start = s.find(cOlon) + 2 # ':'
     # Top-level parser for draws - semicolon separated
-    let draws = make_parser[59](s[start:]) # ';'
+    let draws = make_parser[';'](s[start:])
     var mballs = PseudoDict()
     for d in range(draws.length()):
         # Secondary level parser for comma-separated colors
-        let colors = make_parser[44](draws.get(d)) # ','
+        let colors = make_parser[','](draws.get(d))
         for b in range(colors.length()):
             # split color name and value
-            let tok = make_parser[32](colors.get(b))
+            let tok = make_parser[' '](colors.get(b))
             let v = atoi(tok.get(0))
             let col = tok.get(1)
             mballs.put_max(col, v.to_int())
@@ -66,7 +65,7 @@ fn maxdict(s: StringSlice) -> PseudoDict:
 
 fn main() raises:
     let f = open("day02.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
     var sum1 = Atomic[DType.int32](0)
     var sum2 = Atomic[DType.int32](0)
 

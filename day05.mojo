@@ -59,13 +59,13 @@ struct TransformStep(CollectionElement):
 
 fn main() raises:
     let f = open("day05.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
     var transform = DynamicVector[TransformStep](10)
     var numbers = DynamicVector[Int64](20)
 
     @parameter
     fn parse() -> Int64:
-        let s = make_parser[32](lines.get(0))
+        let s = make_parser[' '](lines.get(0))
         numbers.clear()
         for i in range(1, s.length()):
             numbers.push_back(atoi(s.get(i)))
@@ -75,11 +75,12 @@ fn main() raises:
             let line = lines.get(l)
             if not line.size:
                 continue
-            if line[line.size - 1] == 58: # ":"
+            alias cOlon = ord(':')
+            if line[line.size - 1] == cOlon: # ":"
                 transform.push_back(cur ^)
                 cur = TransformStep()
             else:
-                let lp = make_parser[32](line)
+                let lp = make_parser[' '](line)
                 let dst = atoi(lp.get(0))
                 let src = atoi(lp.get(1))
                 let rl = atoi(lp.get(2))

@@ -54,13 +54,13 @@ struct MultiMatcher:
 
 fn main() raises:
     let f = open("day01.txt", "r")
-    let p = make_parser[10](f.read())
+    let p = make_parser['\n'](f.read())
     # Since we want the parallel code to work correctly, we store the sums in atomic integers
     var a1 = Atomic[DType.int32](0)
     var a2 = Atomic[DType.int32](0)
-    # Helpful constants(hopefully) in place of ord('0') and ord('9') which were super slow.
-    let zero = 48
-    let nine = 57
+    # Used in place of ord('0') and ord('9') which were super slow at runtime
+    alias zero = ord('0')
+    alias nine = ord('9')
 
     # This function processes a single line of the input for task one and increments the sum as needed.
     @parameter

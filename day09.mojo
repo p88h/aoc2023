@@ -31,7 +31,7 @@ struct Matrix2D:
 
     # parse and store an input line as a column in the matrix
     fn store_column(inout self, x: Int, s: StringSlice):
-        let p = make_parser[32](s)
+        let p = make_parser[' '](s)
         for i in range(p.length()):
             self.nums[self.cols * i + x] = atoi(p.get(i)).to_int()
 
@@ -85,8 +85,8 @@ struct Matrix2D:
 
 fn main() raises:
     let f = open("day09.txt", "r")
-    let lines = make_parser[10](f.read())
-    let first = make_parser[32](lines.get(0))
+    let lines = make_parser['\n'](f.read())
+    let first = make_parser[' '](lines.get(0))
     var mat = Matrix2D(first.length(), lines.length())
 
     @parameter

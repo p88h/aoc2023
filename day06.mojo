@@ -34,12 +34,12 @@ fn quadratic(t: Int64, d: Int64) -> Int64:
 
 fn main() raises:
     let f = open("day06.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
 
     @parameter
     fn part1() -> Int64:
-        let times = make_parser[32](lines.get(0))
-        let dist = make_parser[32](lines.get(1))
+        let times = make_parser[' '](lines.get(0))
+        let dist = make_parser[' '](lines.get(1))
         var s: Int64 = 1
         for i in range(1,times.length()):
             let t = atoi(times.get(i))

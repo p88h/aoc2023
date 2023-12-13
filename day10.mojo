@@ -57,7 +57,7 @@ struct MicroMap:
 
 fn main() raises:
     let f = open("day10.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
     let distance = DTypePointer[DType.int32].alloc(lines.length() * 256)
     var sum = Atomic[DType.int64](0)
 

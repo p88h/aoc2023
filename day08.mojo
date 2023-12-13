@@ -48,11 +48,13 @@ struct Game:
         let l = encode(s[7:10])
         let r = encode(s[12:15])
         # start node goes into the vector
-        if s[2] == 65:  # 'A'
+        alias cA = ord('A')
+        if s[2] == cA:  # 'A'
             self.sp.push_back(n)
         self.lr[n] = (l << 15) + r
         # final node gets a bit
-        if s[2] == 90:  # 'Z'
+        alias cZ = ord('Z')
+        if s[2] == cZ:  # 'Z'
             self.lr[n] |= 1 << 30
         # print(s,n,l,r,self.lr[n])
         self.cnt += 1
@@ -65,7 +67,7 @@ struct Game:
 
 fn main() raises:
     let f = open("day08.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
     let ins = lines.get(0)
     var game = Game()
     var results = DynamicVector[Int](10)

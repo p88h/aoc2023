@@ -4,7 +4,7 @@ from array import Array
 
 fn main() raises:
     let f = open("day11.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
 
     fn compute1(owned exp: Array[DType.int64], owned cnt: Array[DType.int64]) -> Int64:
         var pos: Int64 = 0

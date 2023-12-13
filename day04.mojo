@@ -14,11 +14,11 @@ alias zero = 48
 # natively, shame. But we can reduce at least, so we just need 3 shifting steps.
 fn bitcnt(m: SIMD[DType.uint8, 16]) -> Int:
     # odd / even bits
-    let s55 = SIMD[DType.uint8, 16](0x55)
+    alias s55 = SIMD[DType.uint8, 16](0x55)
     # two-bit mask
-    let s33 = SIMD[DType.uint8, 16](0x33)
+    alias s33 = SIMD[DType.uint8, 16](0x33)
     # four-bit mask
-    let s0F = SIMD[DType.uint8, 16](0x0F)
+    alias s0F = SIMD[DType.uint8, 16](0x0F)
     # ref: Hacker's Delight or https://en.wikipedia.org/wiki/Hamming_weight
     var mm = m - ((m >> 1) & s55)
     mm = (mm & s33) + ((mm >> 2) & s33)
@@ -36,7 +36,7 @@ fn matches(t: Tuple[SIMD[DType.uint8, 16], SIMD[DType.uint8, 16]]) -> Int:
 @always_inline
 fn main() raises:
     let f = open("day04.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
 
     let count = lines.length()
     # Each game is represented as two 128bit numbers, stored as 16-byte SIMD vectors
@@ -78,8 +78,10 @@ fn main() raises:
             # achievement unlocked: https://github.com/modularml/mojo/issues/1367
             # the below doesn't work. We'll need to live with multiple spaces.
             # s = s.replace("  ", " ") + " "
-            let start = s.find(58)# ':'
-            let sep = s.find(124) # '|'
+            alias cOlon = ord(':')
+            let start = s.find(cOlon)
+            alias cPipe = ord('|')
+            let sep = s.find(cPipe)
             let s1 = s[start + 2:sep]
             let s2 = s[sep + 2:]
             games.push_back((bitfield(s1), bitfield(s2)))

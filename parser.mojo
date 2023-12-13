@@ -106,12 +106,16 @@ fn make_parser[sep: Int8](s: String) -> Parser:
     p.parse[sep]()
     return p ^
 
+fn make_parser[sep: StringLiteral](s: String) -> Parser:
+    return make_parser[ord(sep)](s)
 
 fn make_parser[sep: Int8](s: StringSlice) -> Parser:
     var p = Parser(s)
     p.parse[sep]()
     return p ^
 
+fn make_parser[sep: StringLiteral](s: StringSlice) -> Parser:
+    return make_parser[ord(sep)](s)
 
 # small tests
 fn main():

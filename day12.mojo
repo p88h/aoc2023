@@ -11,10 +11,9 @@ struct Solver:
     var rules : DynamicVector[Int]
 
     fn __init__(inout self, line: StringSlice, mult: Int = 1):
-        alias cOmma = ord(',')
         alias cAsk = ord('?')
-        let p = make_parser[32](line)
-        let r = make_parser[cOmma](p[1])
+        let p = make_parser[' '](line)
+        let r = make_parser[','](p[1])
         let l = p[0].size * mult + mult - 1
         self.csize = (l+2) * 32
         self.cache = Array[DType.int64](self.csize, -1)
@@ -85,7 +84,7 @@ struct Solver:
 
 fn main() raises:
     let f = open("day12.txt", "r")
-    let lines = make_parser[10](f.read())
+    let lines = make_parser['\n'](f.read())
     var sum1 = Atomic[DType.int64](0)
     var sum2 = Atomic[DType.int64](0)
 

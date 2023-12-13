@@ -19,3 +19,8 @@ def minibench(fns, loops=100):
             ofs += 1
             div *= 1000
         print("{}\t {} {} ({} loops)".format(key, ((end - start) * div) / sloop, units[ofs], sloop))
+
+#def foo():
+#    time.sleep(0.01)
+#    return 1
+#minibench({"sleep": foo})

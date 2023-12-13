@@ -60,3 +60,30 @@ fn run_multiline_task[f1: fn (Int, /) capturing -> None, f2: fn (Int, /) capturi
     minibench[part2]("part2")
     minibench[part2_parallel]("part2 parallel")
     
+# test the benchmark accuracy (or, well, sleep acuracy, since you can't sleep for <~100 usec reliably)
+fn main():
+    fn sleep20usec() -> Int64:
+        time.sleep(0.00002)
+        return 1
+
+    fn sleep100usec() -> Int64:
+        time.sleep(0.0001)
+        return 1
+
+    fn sleep500usec() -> Int64:
+        time.sleep(0.0005)
+        return 1
+
+    fn sleep10ms() -> Int64:
+        time.sleep(0.01)
+        return 1
+
+    fn sleep50ms() -> Int64:
+        time.sleep(0.05)
+        return 1
+
+    minibench[sleep20usec]("sleep20usec")
+    minibench[sleep100usec]("sleep100usec")
+    minibench[sleep500usec]("sleep500usec")
+    minibench[sleep10ms]("sleep10ms")
+    minibench[sleep50ms]("sleep50ms")

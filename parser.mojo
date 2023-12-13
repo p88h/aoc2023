@@ -81,14 +81,14 @@ struct Parser:
     fn __getitem__(self, idx: Int) -> StringSlice:
         return self.rows[idx]
 
-    fn parse[sep: Int8](inout self):
+    fn parse[sep: Int8](inout self, skip_empty: Bool = True):
         var start: Int = 0
         for i in range(self.ptr_size):
             if self.contents[i] == sep:
-                if i != start:
+                if i != start or not skip_empty:
                     self.rows.push_back(StringSlice(self.contents.offset(start), i - start))
                 start = i + 1
-        if start < self.ptr_size:
+        if start < self.ptr_size or (start == self.ptr_size and not skip_empty):
             self.rows.push_back(StringSlice(self.contents.offset(start), self.ptr_size - start))
 
     # return view of the selected row / item
@@ -101,21 +101,21 @@ struct Parser:
 
 # Since constructors cannot be parametrized, passing the const separator via
 # a helper function. Need two of those for each of the source types. 
-fn make_parser[sep: Int8](s: String) -> Parser:
+fn make_parser[sep: Int8](s: String, skip_empty: Bool = True) -> Parser:
     var p = Parser(s)
-    p.parse[sep]()
+    p.parse[sep](skip_empty)
     return p ^
 
-fn make_parser[sep: StringLiteral](s: String) -> Parser:
-    return make_parser[ord(sep)](s)
+fn make_parser[sep: StringLiteral](s: String, skip_empty: Bool = True) -> Parser:
+    return make_parser[ord(sep)](s, skip_empty)
 
-fn make_parser[sep: Int8](s: StringSlice) -> Parser:
+fn make_parser[sep: Int8](s: StringSlice, skip_empty: Bool = True) -> Parser:
     var p = Parser(s)
-    p.parse[sep]()
+    p.parse[sep](skip_empty)
     return p ^
 
-fn make_parser[sep: StringLiteral](s: StringSlice) -> Parser:
-    return make_parser[ord(sep)](s)
+fn make_parser[sep: StringLiteral](s: StringSlice, skip_empty: Bool = True) -> Parser:
+    return make_parser[ord(sep)](s, skip_empty)
 
 # small tests
 fn main():

@@ -1,5 +1,5 @@
 @value
-struct Array[AType: DType]:
+struct Array[AType: DType](CollectionElement):
     """
     Simple data array with fast clear and initialization.
     """

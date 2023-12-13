@@ -6,9 +6,9 @@ from memory import memset
 from wrappers import minibench
 
 alias intptr = DTypePointer[DType.int32]
-# | and 0 characters
-alias space = 32
-alias zero = 48
+
+alias space = ord(' ')
+alias zero = ord('0')
 
 # Count the bits in a SIMD vector. Mojo doesn't expose the intrinsics that do this
 # natively, shame. But we can reduce at least, so we just need 3 shifting steps.

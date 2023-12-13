@@ -50,6 +50,9 @@ Day11hv part1   0.36 ms     0.11 ms     8.09 μs     nan         * 13 - 44
 Day11hv part2   0.36 ms     0.11 ms     8.12 μs     nan         * 13 - 44
 Day12 part1     5.50 ms     1.56 ms     0.37 ms     0.11 ms     * 14 - 49
 Day12 part2     0.11 s      0.03 s      2.78 ms     0.63 ms     * 53 - 180
+Day13 parse     0.84 ms     0.07 ms     0.01 ms     nan         * 6 - 81
+Day13 part1     0.12 ms     5.38 μs     1.17 μs     nan         * 4 - 106
+Day13 part2     0.18 ms     0.01 ms     1.91 μs     nan         * 6 - 93
 
-Total         143.36 ms    41.38 ms     3.92 ms     nan         * 10 - 36
+Total         144.50 ms    41.47 ms     3.93 ms     nan         * 10 - 36
 ```

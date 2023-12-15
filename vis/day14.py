@@ -48,7 +48,7 @@ def fnv1a(ppos):
         for (x,y) in ppos:
             hash = ((hash ^ x) * 16777619) & 0xFFFFFFFF
             hash = ((hash ^ y) * 16777619) & 0xFFFFFFFF
-        return hash % 999983
+        return hash
 
 class Background:
     def __init__(self, board, pic, pebbles):
@@ -60,7 +60,7 @@ class Background:
         self.bepples = []
         self.dx = 0
         self.dy = -1
-        self.hc = fnv1a(pebbles)
+        self.hc = 0
         self.load = sum([len(pic) - y for (y, _) in pebbles])
         self.seen = {}
         self.ccnt = 0
@@ -75,7 +75,7 @@ class Background:
                 self.board[y][x].render_block(view.win)
         dim = len(self.pic)
         if self.pebbles:
-            # print(self.pebbles)
+            moved = 0
             for _ in range(self.speed):                
                 updated = []
                 for x, y in self.pebbles:
@@ -86,16 +86,23 @@ class Background:
                         self.pic[ny][nx] = "O"
                         self.board[ny][nx].height = 2
                         updated.append((nx,ny))
+                        moved += 1
                     else:
-                        self.bepples.append((x,y))
-                self.pebbles = updated
-        else:            
-            (self.dx, self.dy) = (-self.dy, self.dx)
+                        updated.append((x,y))
+                if moved > 0:
+                    self.pebbles = updated
+                else:                    
+                    self.pebbles = []
+                    self.bepples = updated
+                    break
+        else:                        
+            (self.dx, self.dy) = (self.dy, -self.dx)
             self.pebbles = self.bepples
             self.pebbles.sort()
             self.bepples = []
             if (self.dy == -1):
-                self.seen[self.hc] = self.ccnt
+                if self.hc:
+                    self.seen[self.hc] = self.ccnt
                 self.ccnt += 1
                 self.hc = fnv1a(self.pebbles)
                 self.load = sum([dim - y for (y, _) in self.pebbles])

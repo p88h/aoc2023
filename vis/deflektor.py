@@ -10,7 +10,7 @@ class Mirror:
         self.forward = f
 
     def draw(self, surface: pygame.Surface, ofsx, ofsy):
-        hsize = self.size // 2
+        hsize = self.size // 2 - 2
         cx = ofsx + self.x * self.size + hsize
         cy = ofsy + self.y * self.size + hsize
         if self.forward:
@@ -38,7 +38,7 @@ class Splitter:
         self.vertical = v
 
     def draw(self, surface: pygame.Surface, ofsx, ofsy):
-        hsize = self.size // 2
+        hsize = self.size // 2 - 2
         cx = ofsx + self.x * self.size + hsize
         cy = ofsy + self.y * self.size + hsize
         if self.vertical:
@@ -72,16 +72,30 @@ class Display:
         self.fx = self.sx + self.dimx * self.scale
         self.fy = self.sy + self.dimy * self.scale
         self.start = (-1, 0, 1, 0)
+        self.score = 0
+        self.best = 0
         self.compute()
 
     def click(self, pos, state):
         if state:
             return
         (x, y) = pos
-        if x >= self.sx and x < self.fx and y >= self.sy and y < self.fy:
+        if x >= self.sx - self.scale and x < self.fx + self.scale and y >= self.sy - self.scale and y < self.fy + self.scale:
             (xi, yi) = ((x - self.sx) // self.scale, (y - self.sy) // self.scale)
             if (xi, yi) in self.grid:
                 self.grid[(xi, yi)].switch()
+                self.compute()
+            if xi == -1:
+                self.start = (xi, yi, 1, 0)
+                self.compute()
+            if yi == -1:
+                self.start = (xi, yi, 0, 1)
+                self.compute()
+            if xi == self.dimx:
+                self.start = (xi, yi, -1, 0)
+                self.compute()
+            if yi == self.dimy:
+                self.start = (xi, yi, 0, -1)
                 self.compute()
 
     def compute(self):
@@ -111,6 +125,8 @@ class Display:
                 for dx, dy in dirs:
                     next.append((x, y, dx, dy))
             current = next
+        self.score = len(warm)
+        self.best = max(self.best, self.score)
 
     def center(self, x, y):
         return (self.sx + x * self.scale + self.scale // 2, self.sy + y * self.scale + self.scale // 2)
@@ -121,15 +137,20 @@ class Display:
         tcol = (120, 120, 120, 255)
         if (self.hidx == 0):
             view.win.fill((0, 0, 0, 0))
-            pygame.draw.rect(view.win, tcol, (self.sx - 4, self.sy - 4, self.dimx * self.scale + 4, self.dimy * self.scale + 4), 4)            
+            pygame.draw.rect(view.win, tcol, (self.sx - 4, self.sy - 4, self.dimx * self.scale + 4, self.dimy * self.scale + 4), 4)
             for pos in self.grid:
-                self.grid[pos].draw(view.win, self.sx, self.sy)
+                self.grid[pos].draw(view.win, self.sx, self.sy)        
+            view.font.render_to(view.win, (self.fx + 20, self.sy + 20), "Score: " + str(self.score), (255, 255, 255, 255))
+            view.font.render_to(view.win, (self.fx + 20, self.sy + 40), "Best: " + str(self.best), (255, 255, 255, 255))
+
         lcol = (255, 255, 255, 255)
         for _ in range(10):
             if self.hidx < len(self.history):
                 for x, y, dx, dy in self.history[self.hidx]:
                     cx1, cy1 = self.center(x, y)
                     cx2, cy2 = self.center(x + dx, y + dy)
+                    cx2 = max(self.sx, min(cx2, self.fx))
+                    cy2 = max(self.sy, min(cy2, self.fy))
                     pygame.draw.line(view.win, lcol, (cx1, cy1), (cx2, cy2), 2)
                 self.hidx += 1
 

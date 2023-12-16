@@ -58,6 +58,8 @@ Day14 part1     0.28 ms     0.04 ms     5.95 μs     nan         * 6 - 46
 Day14 part2     0.19 s      0.04 s      7.40 ms     nan         * 5 - 25
 Day15 part1     0.68 ms     0.14 ms     0.01 ms     nan         * 9 - 47
 Day15 part2     1.09 ms     0.33 ms     0.05 ms     nan         * 6 - 22
+Day16 part1     2.86 ms     1.05 ms     0.03 ms     nan         * 30 - 82
+Day16 part2     0.48 s      0.18 s      7.50 ms     3.99 ms     * 45 - 121
 
-Total         333.18 ms    84.26 ms    11.44 ms     nan         * 7 - 29
+Total         819.00 ms   266.62 ms    18.98 ms     nan         * 14 - 43
 ```

@@ -1,3 +1,4 @@
+from algorithm import parallelize
 from parser import *
 from wrappers import minibench
 from array import Array
@@ -10,10 +11,10 @@ fn main() raises:
     let dimx = tiles.length()
     let dimy = tiles[0].size
     var ignored = Array[DType.int8](1000)
-    var current = Array[DType.int32](1000)
-    var next = Array[DType.int32](1000)
-    var visited = Array[DType.int8](110*110)
+    var order = Array[DType.int32](4000)
+    var scnt : Int = 0
     var warm : Int64 = 0
+    var mmax = Atomic[DType.int64](0)
 
     fn bidx(x: Int32, y: Int32) -> Int32:
         if (y+1) % 111 != 0:
@@ -22,6 +23,9 @@ fn main() raises:
 
     @parameter
     fn bfs(start: SIMD[DType.int32,4]) -> Int64:
+        var current = Array[DType.int32](1000)
+        var next = Array[DType.int32](1000)
+        var visited = Array[DType.int8](110*110)
         var x: Int32
         var y: Int32
         var dx: Int32
@@ -32,7 +36,6 @@ fn main() raises:
             return 0
         var curs = 4
         warm = 0
-        visited.clear()
         current.data.aligned_simd_store[4,4](0, start)
         while curs > 0:
             var nexs = 0
@@ -85,25 +88,46 @@ fn main() raises:
             curs = nexs
             current.swap(next)
         return warm
+    
+    @parameter
+    fn prep() -> Int64:
+        var o : Int = 0 
+        for x in range(dimx):
+            order.data.aligned_simd_store[4,4](o, SIMD[DType.int32,4](x,-1,0,1))
+            order.data.aligned_simd_store[4,4](o+4, SIMD[DType.int32,4](x,dimy,0,-1))
+            o += 8
+        for y in range(dimy):
+            order.data.aligned_simd_store[4,4](o, SIMD[DType.int32,4](-1,0,1,0))
+            order.data.aligned_simd_store[4,4](o+4, SIMD[DType.int32,4](dimx,0,-1,0))
+            o += 8
+        return o
 
     @parameter
     fn part1() -> Int64:
         return bfs(SIMD[DType.int32,4](-1,0,1,0))
 
     @parameter
+    fn step2(i: Int):
+        mmax.max(bfs(order.data.aligned_simd_load[4,4](i*4)))
+
+    @parameter
     fn part2() -> Int64:
         ignored.clear()
-        var m : Int64 = 0
-        for x in range(dimx):
-            m = max(m, bfs(SIMD[DType.int32,4](x,-1,0,1)))
-            m = max(m, bfs(SIMD[DType.int32,4](x,dimy,0,-1)))
-        for y in range(dimy):
-            m = max(m, bfs(SIMD[DType.int32,4](-1,0,1,0)))
-            m = max(m, bfs(SIMD[DType.int32,4](dimx,0,-1,0)))
-        return m
+        for i in range(scnt):
+            step2(i)            
+        return mmax.value
 
+    @parameter
+    fn part2_parallel() -> Int64:
+        ignored.clear()
+        parallelize[step2](scnt, 8)
+        return mmax.value
+
+    scnt = prep().to_int() // 4
     minibench[part1]("part1")
     minibench[part2]("part2")
+    minibench[part2_parallel]("part2_parallel")
 
     print(tiles.length(), "tokens", dimx, dimy, warm)
-    print(ignored.size + current.size + next.size + visited.size, "temp buffers size")
+    print(ignored.size, "temp buffers size")
+    print(order.size, "start point buffer")

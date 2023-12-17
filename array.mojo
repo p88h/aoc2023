@@ -17,8 +17,14 @@ struct Array[AType: DType](CollectionElement):
     fn __getitem__(self, idx: Int) -> SIMD[AType, 1]:
         return self.data[idx]
 
+    fn __getitem__(self, idx: Int32) -> SIMD[AType, 1]:
+        return self.data[idx.to_int()]
+
     fn __setitem__(inout self, idx: Int, val: SIMD[AType, 1]):
         self.data[idx] = val
+
+    fn __setitem__(inout self, idx: Int32, val: SIMD[AType, 1]):
+        self.data[idx.to_int()] = val
 
     fn __del__(owned self):
         self.data.free()

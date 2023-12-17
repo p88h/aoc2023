@@ -11,6 +11,7 @@ fn minibench[fun: fn () capturing -> Int64](label: StringLiteral, loops: Int = 1
     while sloop <= 100000000 and end - start < 1000000000:
         sloop *= 10
         start = time.now()
+        t = 0
         for _ in range(sloop):
             t += fun()
         end = time.now()
@@ -25,7 +26,7 @@ fn minibench[fun: fn () capturing -> Int64](label: StringLiteral, loops: Int = 1
     
     let unit = units[pos]
     print(fun())
-    print(label, ":", avg / div, unit, "(", sloop, "loops )", t)
+    print(label, ":", avg / div, unit, "(", sloop, "loops ) avg", t // sloop,"mod",t % sloop)
 
 fn run_multiline_task[f1: fn (Int, /) capturing -> None, f2: fn (Int, /) capturing -> None]
     (len: Int, disp: fn () capturing -> None, workers: Int = 12):

@@ -26,6 +26,7 @@ fn main() raises:
         work[2] = pack(0,0,3,0)
         var found = False
         var distance = 0
+        var maxp = 0
         # reset the work queues
         for w in range(1,maxd):
             work[w * maxq] = 0
@@ -48,10 +49,15 @@ fn main() raises:
                 # skip if already processed same
                 if best[current].to_int() < distance:
                     continue
-                # heuristic to trim the number of reviewed states. Probably could refine this.
+                # + heuristic to trim the number of reviewed states. Probably could refine this.
                 count[y*dimx+x] += 1
                 if count[y*dimx+x] > maxrun + 1:
                     continue
+                # + another heuristic - limit to +-20 in distance from the frontier
+                if x + y + 22 < maxp:
+                    continue
+                if x + y > maxp:
+                    maxp = x + y
 
                 # this inner function thing is much faster than iterating with a loop.
                 @parameter

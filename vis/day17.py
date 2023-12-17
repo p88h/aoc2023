@@ -57,6 +57,7 @@ class Board:
     def __init__(self, tiles):
         self.tiles = tiles
         self.tiles[0][0].distance = 0
+        self.maxd = (0,0)
         self.maxs = 0
         self.maxh = 0
         self.path = []
@@ -85,11 +86,16 @@ class Board:
                 st.update_block()
                 if st.height > self.maxh:
                     self.maxh = st.height
+                if x + y > self.maxs:
+                    self.maxs = x + y
+                    self.maxd = (x,y)
             if x == self.dimx -1 and y == self.dimy -1:
                 self.found = True
                 break
             if self.best[current] < self.distance:
                 continue
+            if x + y < self.maxs - 20:
+                continue 
             for (nx,ny) in [ (-1,0), (1,0), (0,1), (0,-1) ]:
                 nr = 0
                 if (nx,ny) == (-dx,-dy):
@@ -122,18 +128,17 @@ class Board:
         for t in self.path:
             t.selected = False
         npath = []
-        for i in range(self.dimx-1,-1,-1):
-            st = self.tiles[i][i]
-            if st.done:
-                state = st.done
-                while state:
-                    (x,y,dx,dy,r) = state
-                    st = self.tiles[y][x]
-                    npath.append(st)
-                    st.selected = True
-                    st.update_block()
-                    state = self.prevs[state]
-                break
+        (x,y) = self.maxd
+        #for i in range(self.dimx-1,-1,-1):
+        st = self.tiles[y][x]
+        state = st.done
+        while state:
+            (x,y,dx,dy,r) = state
+            st = self.tiles[y][x]
+            npath.append(st)
+            st.selected = True
+            st.update_block()
+            state = self.prevs[state]
         for t in self.path:
             if not t.selected:
                 t.update_block()

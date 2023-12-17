@@ -18,9 +18,8 @@ def bfs(minrun,maxrun):
         best[pack(x,y,dir,r)] = 0
     found = False
     distance = 0
-    maxd = 0 
-    while not found:
-        maxd = max(maxd,len(dijkstra[distance]))
+    maxp = 0     
+    while not found:        
         for current in dijkstra[distance]:
             (x,y,dir,r) = current
             (dx,dy) = dirs[dir]
@@ -33,6 +32,10 @@ def bfs(minrun,maxrun):
             count[y * dimx + x] += 1
             if count[y * dimx + x] > maxrun + 1:
                 continue
+            if x + y + 22 < maxp:
+                continue
+            if x + y > maxp:
+                maxp = x + y
             for ndir in range(4):
                 (nx,ny) = dirs[ndir]
                 nr = 0

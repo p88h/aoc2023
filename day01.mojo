@@ -23,11 +23,13 @@ struct MultiMatcher:
     var pfx: DynamicVector[Int32]
     var msk: DynamicVector[Int32]
 
-    fn __init__(inout self):
+    fn __init__(inout self, words: VariadicList[StringLiteral]):
         # Pre-allocate just enough capacity
         self.fcv = DynamicVector[Int8](10)
         self.pfx = DynamicVector[Int32](10)
         self.msk = DynamicVector[Int32](10)
+        for i in range(len(words)):
+            self.add(words[i])
 
     fn add(inout self, s: String):
         let l = len(s)
@@ -50,7 +52,6 @@ struct MultiMatcher:
             if self.fcv[i] == cc and (prev & self.msk[i]) == self.pfx[i]:
                 return i
         return -1
-
 
 fn main() raises:
     let f = open("day01.txt", "r")
@@ -83,24 +84,12 @@ fn main() raises:
         # That's it
         a1 += d1 * 10 + d2
 
-    var m = MultiMatcher()
-    var r = MultiMatcher()
-
-    # There is no String reverse in Mojo. This is only used for the static patterns.
-    fn reverse(s: String) -> String:
-        var r = String()
-        for i in range(len(s)):
-            r += s[len(s) - i - 1]
-        return r
-
     # Construct matchers for all words. When looking backwards, the words have to be reversed.
     # Fun fact - VariadicList apparently can hold literals, but cannot hold Strings.
     # Variadic since other list variants only make sense in some very specific contexts
     # like when you only use predetermined list sizes and don't iterate over the list.
-    var words = VariadicList[StringLiteral]("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
-    for i in range(len(words)):
-        m.add(words[i])
-        r.add(reverse(words[i]))
+    let m = MultiMatcher(VariadicList[StringLiteral]("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"))
+    let r = MultiMatcher(VariadicList[StringLiteral]("orez", "eno", "owt", "eerht", "ruof", "evif", "xis", "neves", "thgie", "enin"))
 
     # Similar to the part 1, this does the digits checks and also uses the multi-matchers
     # to find words.
@@ -145,7 +134,7 @@ fn main() raises:
         print(a2.value.to_int())
 
     # this wraps executing the step functions, benchmarking them etc.
-    run_multiline_task[digitize1, digitize2](p.length(), results, 24)
+    run_multiline_task[digitize1, digitize2](p.length(), results, 12)
 
     # While this looks like debug info, Mojo actually sometimes forgets I need the parser in all these step
     # tasks, and happily crashes rather than keeping it around. This holds it in place until that happens.

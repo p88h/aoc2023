@@ -8,3 +8,4 @@ __pycache__/
 *.txt
 *.dSYM
 tempCodeRunnerFile.*
+nanobench.h

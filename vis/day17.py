@@ -94,8 +94,8 @@ class Board:
                 break
             if self.best[current] < self.distance:
                 continue
-            if x + y < self.maxs - 20:
-                continue 
+            #if x + y < self.maxs - 30:
+            #    continue 
             for (nx,ny) in [ (-1,0), (1,0), (0,1), (0,-1) ]:
                 nr = 0
                 if (nx,ny) == (-dx,-dy):

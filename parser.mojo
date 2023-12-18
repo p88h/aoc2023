@@ -34,9 +34,9 @@ struct StringSlice(CollectionElement, Stringable):
 
 # Custom string-to-int which skips spaces, and works on StringSlices
 fn atoi(s: StringSlice) -> Int64:
-    alias zero = 48
-    alias space = 32
-    alias minus = 45
+    alias zero = ord('0')
+    alias space = ord(' ')
+    alias minus = ord('-')
     var ret: Int = 0
     var sign: Int = 1
     for i in range(s.size):
@@ -46,6 +46,21 @@ fn atoi(s: StringSlice) -> Int64:
         elif c != space:
             ret = ret * 10 + c - zero
     return ret * sign
+
+# converts a hex string to number
+fn xtoi(s: StringSlice) -> Int64:
+    alias orda = ord('a')
+    alias zero = ord('0')
+    var ret: Int = 0
+    for i in range(s.size):
+        let c = s.ptr[i].to_int()
+        let v : Int
+        if (c | 32) >= orda: 
+            v = ((c | 32) + 10) - orda
+        else:
+            v = c - zero
+        ret = ret * 16 + v 
+    return ret
 
 
 struct Parser:

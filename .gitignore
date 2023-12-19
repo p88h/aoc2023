@@ -9,3 +9,6 @@ __pycache__/
 *.dSYM
 tempCodeRunnerFile.*
 nanobench.h
+/day19.cc
+/day19
+/day16

@@ -141,7 +141,6 @@ def part2():
         cnt += 1
         if modules[monitor].counts != seen:
             seen = modules[monitor].counts
-            print(cnt)
             prod *= cnt
             if seen.bit_count() == modules[monitor].conn:
                 return prod

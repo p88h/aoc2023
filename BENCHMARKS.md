@@ -64,10 +64,12 @@ Day17 part1     0.05 s      9.36 ms     1.32 ms     nan         * 7 - 39
 Day17 part2     0.13 s      0.02 s      2.87 ms     nan         * 7 - 45
 Day18 part1     0.10 ms     0.02 ms     2.55 μs     nan         * 8 - 40
 Day18 part2     0.18 ms     0.04 ms     2.35 μs     nan         * 18 - 78
-Task             Python      PyPy3       Mojo       parallel    * speedup
 Day19 parse     0.85 ms     0.20 ms     0.03 ms     nan         * 8 - 33
 Day19 part1     0.12 ms     0.04 ms     2.75 μs     nan         * 15 - 42
 Day19 part2     0.30 ms     0.04 ms     0.01 ms     nan         * 3 - 27
+Day20 parse     0.04 ms     9.70 μs     1.19 μs     nan         * 8 - 30
+Day20 part1     0.01 s      1.55 ms     0.33 ms     nan         * 4 - 44
+Day20 part2     0.06 s      6.27 ms     0.41 ms     nan         * 15 - 140
 
-Total        1072.31 ms   327.80 ms    25.52 ms     nan         * 12 - 42
+Total        1144.22 ms   335.63 ms    26.26 ms     nan         * 12 - 43
 ```

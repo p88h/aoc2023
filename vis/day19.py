@@ -187,7 +187,7 @@ class Box3D:
 
 
 view = View(1920, 1200, 60, 24)
-view.setup("Day 16")
+view.setup("Day 19")
 controller = Controller()
 lines = open("day19.txt").read().split("\n")
 rules = parse(lines)

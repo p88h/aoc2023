@@ -1,4 +1,4 @@
-from utils.vector import DynamicVector
+from collections.vector import DynamicVector
 
 @value
 struct StringSlice(CollectionElement, Stringable):

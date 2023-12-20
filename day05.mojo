@@ -1,5 +1,5 @@
 from parser import *
-from utils.vector import DynamicVector
+from collections.vector import DynamicVector
 from math import min, max
 from wrappers import minibench
 

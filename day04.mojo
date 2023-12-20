@@ -1,6 +1,6 @@
 from parser import *
 from os.atomic import Atomic
-from utils.vector import DynamicVector
+from collections.vector import DynamicVector
 from math import min, max
 from memory import memset
 from wrappers import minibench

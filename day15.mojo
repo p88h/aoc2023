@@ -1,7 +1,7 @@
 from parser import *
 from wrappers import minibench
 from array import Array
-from utils.vector import DynamicVector
+from collections.vector import DynamicVector
 
 
 fn main() raises:

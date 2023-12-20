@@ -1,5 +1,6 @@
 # https://github.com/modularml/mojo/issues/1404
 
+from memory.buffer import Buffer
 
 struct Keeper:
     var keep: String
@@ -36,6 +37,8 @@ fn main():
     let keeper = Keeper(String("I want you to hold this"))
     let bkeeper = ByteKeeper(String("I want you to hold this"))
     let simpler = String("I want you to hold this")
+    let buffer = Buffer[128,DType.int8].aligned_stack_allocation[64]() 
+    memcpy(buffer.data, bkeeper.keep, bkeeper.size)
 
     @parameter
     fn doit():
@@ -45,6 +48,10 @@ fn main():
             print(bkeeper.slice(i, i + 5))
         for i in range(len(simpler) - 5):
             print(simpler[i : i + 5])
+        for i in range(len(simpler) - 5):
+            for j in range(i,i+5):
+                print_no_newline(chr(buffer[j].to_int()))
+            print()
 
     doit()
 

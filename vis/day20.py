@@ -9,6 +9,7 @@ class Module:
         self.id = id
         self.targets = targets
         self.state = 0
+        self.freq = 0
 
     def setpos(self, x, y):
         self.x = x
@@ -127,34 +128,51 @@ def parse(lines):
 
 
 class Background:
-    def __init__(self, modules) -> None:
+    def __init__(self, modules, monitor) -> None:
         self.modules = modules
+        self.monitor = monitor
         self.pp = 0
         self.pulses = []
         self.active = set()
+        self.seen = 0
+        self.cnt = 0
+        self.speed = 4
     
     def pushit(self, num):
         self.active.clear()
         if (self.pp == len(self.pulses)):
             self.pulses = self.modules[0].pulse(0)
             self.pp = 0
+            self.cnt += 1
         while self.pp < len(self.pulses) and num > 0:
             (src, level, dst) = self.pulses[self.pp]
             self.active.add((src,dst))
             self.pulses.extend(modules[dst].pulse(level, src))
             self.pp += 1
             num -= 1
+        if self.modules[self.monitor].counts != self.seen:
+            nseen = self.modules[self.monitor].counts & ~self.seen
+            for i in self.modules[self.monitor].linked:
+                if nseen & (1 << i):
+                    self.modules[i].freq = self.cnt
+                    print(i, "activated at", self.cnt)
+
+            self.seen = self.modules[self.monitor].counts            
+            if self.seen.bit_count() == modules[monitor].conn:
+                return True
+        return False
+
 
     def update(self, view, controller):
-        if view.frame > 4000:
+        if view.frame > 4500:
             controller.animate = False
         if not controller.animate:
             return
-        self.pushit(10)
+        if self.cnt % self.speed == self.speed - 1 and self.speed < 512:
+            self.speed *= 2
+        self.pushit(self.speed)
         view.win.fill((0, 0, 0, 0))
-        pygame.draw.line(view.win, (255, 255, 255), (50, 1160), (1870, 1160), 2)
-        pygame.draw.circle(view.win, (255, 255, 255), (51 + view.frame * 5 // 11, 1161), 6)
-        view.font.render_to(view.win, (31 + view.frame * 5 // 11, 1186), "Z " + str(view.frame), (255, 255, 255))
+        view.font.render_to(view.win, (31, 186), "BUTTON PUSHES: " + str(self.cnt), (255, 255, 255))
         for mod in self.modules:
             mod.update(view, controller)
             for i in mod.targets:
@@ -174,6 +192,10 @@ class Background:
                             (dst.x + 20, dst.y),
                         ]
                         pygame.draw.lines(view.win, col, False, points, w)
+                        if mod.freq > 0:
+                            view.font.render_to(view.win, (mod.x - 80, (mod.y+2*dst.y)//3), "FREQ: " + str(mod.freq), (240, 240, 240))
+                        else:
+                            view.font.render_to(view.win, (mod.x - 50, (mod.y+2*dst.y)//3), "FREQ: ?", (160, 160, 160))
                     else:
                         pygame.draw.line(view.win, col, (mod.x + 20, mod.y + 40), (dst.x + 20, dst.y), w)
                 elif mod.y > dst.y:
@@ -186,7 +208,7 @@ class Background:
 
 lines = open("day20.txt").read().split("\n")
 modules, monitor = parse(lines)
-view = View(1920, 1080, 30, 24)
+view = View(1920, 1080, 60, 24)
 view.setup("Day 20")
 controller = Controller()
 modules[0].setpos(900, 300)
@@ -203,5 +225,5 @@ for mod in modules[-6:-2]:
     ofsx += 480
 modules[-2].setpos(900, 700)
 modules[-1].setpos(900, 800)
-controller.add(Background(modules))
+controller.add(Background(modules, monitor))
 controller.run(view)

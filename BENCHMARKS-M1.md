@@ -67,6 +67,9 @@ Day18 part2     0.23 ms     0.07 ms     3.59 μs     nan         * 19 - 64
 Day19 parse     1.10 ms     0.43 ms     0.04 ms     nan         * 9 - 25
 Day19 part1     0.15 ms     0.06 ms     6.54 μs     nan         * 9 - 23
 Day19 part2     0.40 ms     0.07 ms     7.36 μs     nan         * 9 - 54
+Day20 parse     0.05 ms     0.02 ms     2.20 μs     nan         * 7 - 22
+Day20 part1     0.02 s      2.12 ms     0.25 ms     nan         * 8 - 71
+Day20 part2     0.07 s      8.27 ms     0.45 ms     nan         * 18 - 157
 
-Total        1590.02 ms   613.78 ms    32.37 ms     nan         * 18 - 49
+Total        1679.41 ms   624.19 ms    33.08 ms     nan         * 18 - 50
 ```

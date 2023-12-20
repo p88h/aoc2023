@@ -1,6 +1,6 @@
 from parser import *
 from wrappers import minibench
-from array import Array
+from memory.buffer import Buffer
 
 # Encode a string label into an integer code 
 @always_inline
@@ -13,21 +13,21 @@ fn encode(s: StringSlice) -> Int:
         ret = ret * 26 + (s[i].to_int()) - orda
     return ret
 
-
 fn main() raises:
     let f = open("day20.txt", "r")
     let lines = make_parser["\n"](f.read())
-    let modules = Array[DType.int64](64)
-    let masks = Array[DType.int64](64)
-    let counts = Array[DType.int64](64)
-    let conns = Array[DType.int8](64+64*8)
-    let mapping = Array[DType.int8](26*26)
-    var pulses = Array[DType.int8](16000)
+    let modules = Buffer[64,DType.int64].aligned_stack_allocation[8]()
+    let masks = Buffer[64,DType.int64].aligned_stack_allocation[8]()
+    let counts = Buffer[64,DType.int64].aligned_stack_allocation[8]()
+    let conns = Buffer[64*9,DType.int8].aligned_stack_allocation[64]()
+    let mapping = Buffer[32*32,DType.int8].aligned_stack_allocation[64]()
+    let pulses = Buffer[16000,DType.int8].aligned_stack_allocation[64]()
 
     @parameter
     fn parse() -> Int64:
-        conns.clear()
-        mapping.clear()        
+        masks.zero()
+        conns.zero()
+        mapping.zero()
         var cnt = 1
         for i in range(lines.length()):
             let line = lines[i]
@@ -74,17 +74,18 @@ fn main() raises:
     @parameter
     fn push() -> SIMD[DType.int32, 2]:
         var pi = 0
-        var pc = 2                        
+        var pc = 2
         var pcnt = SIMD[DType.int32, 2](0,0)
+        pulses[0] = pulses[1] = 0
         while pi < pc:
             let src = pulses[pi].to_int() 
             let dst = (pulses[pi+1] & 63).to_int()
             var level = (pulses[pi+1] >> 6).to_int()
             var module = modules[dst]
             let c = conns.data.aligned_simd_load[8,8](64+dst * 8)
-            let op = (module >> 60)            
+            let op = (module >> 60)
             pcnt[level] += 1
-            # print(pi//2,src,dst,level,"|",module,op)
+            #print(pi//2,src,dst,level,"|",module&~(op<<60),op,masks[dst])
             pi += 2
             if op == 1: # %
                 if level == 0:
@@ -107,13 +108,14 @@ fn main() raises:
             for i in range(c[0].to_int()):
                 pulses[pc] = dst
                 pulses[pc+1] = c[i+1] + (level << 6)
+                #print(level,">",c[i+1])
                 pc += 2            
         #print()
         return pcnt
 
     @parameter
     fn reset():
-        counts.clear()
+        counts.zero()
         for m in range(64):
             modules[m] &= (3<<60)
 
@@ -148,13 +150,10 @@ fn main() raises:
                     return prod
         return cnt
 
-    #print(parse())
-    #print(part1())
-    #print(part2())
     minibench[parse]("parse")
     minibench[part1]("part1")
     minibench[part2]("part2")
 
     print(lines.length(), "lines")
-    print((modules.size + counts.size + masks.size) * 8, "module data total size")
-    print(conns.size + mapping.size + pulses.size, "extra arrays total size")
+    print(modules.bytecount() + counts.bytecount() + masks.bytecount(), "module data total size")
+    print(conns.bytecount() + mapping.bytecount() + pulses.bytecount(), "extra arrays total size")

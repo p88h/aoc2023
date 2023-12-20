@@ -38,3 +38,13 @@ struct Array[AType: DType](CollectionElement):
     fn swap(inout self, inout other: Self):
         (self.data, other.data) = (other.data ^, self.data ^)
         (self.size, other.size) = (other.size, self.size)
+
+    #  Buffer compat
+    fn bytecount(self) -> Int:
+        return self.size * sizeof[AType]()
+
+    fn fill(inout self, value: SIMD[AType, 1] = 0):
+        self.clear(value)
+
+    fn zero(inout self):
+        self.clear(0)

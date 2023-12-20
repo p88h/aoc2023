@@ -31,8 +31,8 @@ class Module:
         if self.state == 1:
             bcol,tcol=tcol,bcol
         pygame.draw.rect(view.win, bcol, (self.x, self.y, 40, 40))
-        pygame.draw.rect(view.win, tcol, (self.x, self.y, 40, 40), 2)
-        view.font.render_to(view.win, (self.x + 7, self.y + 28), self.name, )
+        pygame.draw.rect(view.win, (120,120,120), (self.x, self.y, 40, 40), 2)
+        view.font.render_to(view.win, (self.x + 7, self.y + 28), self.name, tcol)
 
 
 class Dummy(Module):

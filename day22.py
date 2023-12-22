@@ -8,18 +8,14 @@ def drop(bricks):
     unsafe = [ 0 ] * len(bricks)
     for i,(z1,x1,y1,z2,x2,y2) in enumerate(bricks):
         suppon.append([])
-        while z1 > 1:
+        if z1 > 1:
             if x1 != x2:
-                assert(x1<x2)
                 mh = max([height[x + y1*10] for x in range(x1,x2+1)])
             else:
-                assert(y1<=y2)
                 mh = max([height[x1 + y*10] for y in range(y1,y2+1)])
-            if mh < z1 - 1:
-                z1 -= 1
-                z2 -= 1
-            else:
-                break
+            if z1 - 1 > mh:
+                z2 -= z1 - 1 - mh
+                z1 = mh + 1
         sup = []
         prev = -1
         if x1 != x2:

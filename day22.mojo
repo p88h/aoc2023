@@ -56,15 +56,13 @@ fn main() raises:
                 rng[rl] = vec[2] + y * 10
                 rl += 1
         # print(idx,vec, rl, rng)
-        while vec[0] > 1:
+        if vec[0] > 1:
             var mh: Int16 = 0
             for i in range(rl):
                 mh = max(mh, hmap[rng[i].to_int()])
             if mh < vec[0] - 1:
                 alias sub = SIMD[DType.int16, 8](1, 0, 0, 0, 1, 0, 0, 0)
-                vec -= sub
-            else:
-                break
+                vec -= sub * (vec[0] - 1 - mh)
         var sup = SIMD[DType.int16, 8](0)
         var prev : Int16 = -1
         for i in range(rl):

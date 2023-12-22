@@ -32,6 +32,31 @@ struct StringSlice(CollectionElement, Stringable):
         return StringSlice(self.ptr.offset(idxs.start), end - idxs.start)
 
 
+# Convert a line to a packet SIMD list, with some customization over skipping and stuff
+fn atomi[width: Int, AType: DType, skipspace: Bool = True, negative: Bool = True](s: StringSlice) -> SIMD[AType, width]:
+    alias zero = ord('0')
+    alias nine = ord('9')
+    alias minus = ord('-')
+    alias space = ord(' ')
+    var ret = SIMD[AType, width](0)
+    var rp = 0
+    var sign: Int = 1
+    for i in range(s.size):
+        let c = s.ptr[i].to_int()
+        if c >= zero and c <= nine:
+            ret[rp] = ret[rp] * 10 + c - zero
+        elif negative and c == minus:
+            sign = -1
+        elif skipspace and c == space:
+            continue
+        else:
+            if negative:
+                ret[rp] *= sign
+            rp += 1
+    if negative:
+        ret[rp] *= sign
+    return ret
+
 # Custom string-to-int which skips spaces, and works on StringSlices
 fn atoi(s: StringSlice) -> Int64:
     alias zero = ord('0')

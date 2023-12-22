@@ -48,3 +48,9 @@ struct Array[AType: DType](CollectionElement):
 
     fn zero(inout self):
         self.clear(0)
+
+    fn aligned_simd_load[width: Int, T: Intable](self, ofs: T) -> SIMD[AType, width]:
+        return self.data.aligned_simd_load[width, Self.simd_width, T](ofs)
+
+    fn aligned_simd_store[width: Int, T: Intable](self, ofs: T, val: SIMD[AType, width]):
+        self.data.aligned_simd_store[width, Self.simd_width, T](ofs, val)

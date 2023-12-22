@@ -28,12 +28,13 @@ for f in glob.glob("all_*.txt"):
             mat[row][order[col+suf]*2+1]=unit
 
 
-sums = [0] * 3
+sums = [0] * 4
 for row in sorted(mat):
     label = row.replace("day","Day").replace("_", " ")
     raw = []
     for i in range(4):
         if math.isnan(mat[row][2*i]):
+            sums[i] += raw[2]
             continue
         # convert everything to microseconds
         unit = mat[row][2*i+1]
@@ -48,8 +49,7 @@ for row in sorted(mat):
         else:
             print("BORK BORK BORK:", label, row, unit, mat[row][2*i])
             exit(0)
-        if i < 3:
-            sums[i] += raw[i]
+        sums[i] += raw[i]
     if len(raw) > 3 and raw[3] < raw[2]:
         raw[2] = raw[3]
     r1 = int(raw[1] / raw[2])
@@ -57,15 +57,15 @@ for row in sorted(mat):
     print("{0:<16s}{1:01.2f} {2:<2s}     {3:01.2f} {4:<2s}     {5:01.2f} {6:<2s}     {7:01.2f} {8:<2s}     * {9} - {10}".format(label,*mat[row],r1,r2))
     #print(label, mat[row])
 
-tr1 = int(sums[1] / sums[2])
-tr2 = int(sums[0] / sums[2])
+tr1 = int(sums[1] / sums[3])
+tr2 = int(sums[0] / sums[3])
 totf = []
-for i in range(3):
+for i in range(4):
     totf.append(sums[i] / 1000)
     totf.append("ms")
-totf.append(math.nan)
-totf.append("   ")
+#totf.append(math.nan)
+#totf.append("   ")
 
 print()
-print("{0:<13s}{1:>7.2f} {2}   {3:>6.2f} {4}    {5:>5.2f} {6}   {7:5.2f} {8}     * {9} - {10}".format("Total",*totf,tr1,tr2))
+print("{0:<13s}{1:>7.2f} {2}   {3:>6.2f} {4}    {5:>5.2f} {6}    {7:5.2f} {8}     * {9} - {10}".format("Total",*totf,tr1,tr2))
     

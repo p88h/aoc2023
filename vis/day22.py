@@ -23,7 +23,7 @@ def parse(lines):
 def project2d(v):
     x, y, z = v
     x, y, z = 40 * x, 40 * y, 40 * z
-    xp = (x + y) / math.sqrt(2) + 800
+    xp = (x + y) / math.sqrt(2) + 700
     yp = (x - 2 * z - y) / math.sqrt(6) + 1000
     return (int(xp), int(yp))
 

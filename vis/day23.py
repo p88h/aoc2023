@@ -96,6 +96,7 @@ class Board:
         self.frames = frames
         self.fidx = 0
         self.speed = 1
+        self.lines = []
 
     def update(self, view, controller):
         if not controller.animate:
@@ -107,6 +108,8 @@ class Board:
                 st = self.tiles[y][x]
                 st.done = True
                 st.update_block()
+            else:                
+                self.lines.append(d)
             self.fidx += 1
             if self.fidx >= len(self.frames):
                 controller.animate = False
@@ -118,6 +121,11 @@ class Board:
         for y in range(dimy-1,-1,-1):
             for x in range(dimx-1,-1,-1):
                 self.tiles[y][x].render_block(view.win, 6)
+        for ((x1,y1),(x2,y2)) in self.lines:
+            tx1,ty1 = self.tiles[y1][x1].pos
+            tx2,ty2 = self.tiles[y2][x2].pos
+            pygame.draw.line(view.win, (220,255,255), (tx1+6,ty1-6),(tx2+6,ty2-6), 5)
+            pygame.draw.line(view.win, (10,10,10), (tx1+6,ty1-6),(tx2+6,ty2-6), 3)
 
 
 controller = Controller()

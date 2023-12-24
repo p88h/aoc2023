@@ -52,6 +52,7 @@ fn atomi[width: Int, AType: DType, skipspace: Bool = True, negative: Bool = True
         else:
             if negative:
                 ret[rp] *= sign
+                sign = 1
             rp += 1
     if negative:
         ret[rp] *= sign

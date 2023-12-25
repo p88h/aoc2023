@@ -47,15 +47,13 @@ def edmond_karp(cnt, src, tgt = None):
         for i in range(1, len(path)):
             cur = path[i]
             graph[cur].remove(pre)
-            graph[pre].remove(cur)
             removed.append((cur,pre))
             pre = cur
     # Compute the reachable nodes in residual graph
     reachable = bfs(src, tgt)
     # Restore removed edges
     for (a,b) in removed:
-            graph[a].add(b)
-            graph[b].add(a)
+        graph[a].add(b)
     return len(reachable)
 
 def part1():

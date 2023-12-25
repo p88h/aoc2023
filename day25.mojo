@@ -90,7 +90,7 @@ fn main() raises:
             tgt = pre
             for i in range(1, plen):
                 let cur = work[i].to_int()
-                marks[cur * maxn + pre] = marks[pre * maxn + cur] = 1
+                marks[cur * maxn + pre] = 1
                 pre = cur
 
         # Compute the reachable nodes in residual graph

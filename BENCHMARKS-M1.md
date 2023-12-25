@@ -80,8 +80,8 @@ Day23 part2     5.85 s      1.79 s      0.19 s      0.04 s      * 43 - 140
 Day24 parse     0.27 ms     0.12 ms     0.10 ms     nan         * 1 - 2
 Day24 part1     0.01 s      3.40 ms     0.18 ms     nan         * 19 - 80
 Day24 part2     8.70 μs     0.05 ms     0.29 μs     nan         * 29 - 170
-Day25 parse     0.83 ms     0.46 ms     0.01 ms     nan         * 35 - 62
-Day25 part1     2.00 ms     1.33 ms     0.10 ms     nan         * 12 - 19
+Day25 parse     0.84 ms     0.49 ms     0.01 ms     nan         * 36 - 62
+Day25 part1     1.75 ms     1.23 ms     0.08 ms     nan         * 14 - 21
 
-Total        7871.57 ms  2523.21 ms   224.11 ms    66.34 ms     * 38 - 118
+Total        7871.34 ms  2523.14 ms   224.09 ms    66.32 ms     * 38 - 118
 ```

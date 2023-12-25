@@ -40,8 +40,7 @@ def bfs(src, tgt = None):
 # push cnt flow between src and tgt
 # then identify the cut and compute the subgraphs
 def edmond_karp(cnt, src, tgt = None):
-    full = []
-    cut = []
+    removed = []
     for i in range(cnt):
         path = bfs(src, tgt)
         tgt = pre = path[0]
@@ -49,30 +48,21 @@ def edmond_karp(cnt, src, tgt = None):
             cur = path[i]
             graph[cur].remove(pre)
             graph[pre].remove(cur)
-            full.append((cur,pre))
+            removed.append((cur,pre))
             pre = cur
     # Compute the reachable nodes in residual graph
-    reachable = set(bfs(src, tgt))
-    # Identify the cut and restore all other edges
-    for (a,b) in full:
-        if a in reachable and b not in reachable:
-            cut.append((a,b))
-        else:
-            graph[a].add(b)
-            graph[b].add(a)
-    # Compute the size of the reachable cluster
     reachable = bfs(src, tgt)
-    # Restore the remaining edges in the cut
-    for (a,b) in cut:
+    # Restore removed edges
+    for (a,b) in removed:
             graph[a].add(b)
             graph[b].add(a)
-    return reachable
+    return len(reachable)
 
 def part1():
     total = len(graph)
     first = lines[0][:3]
     reachable = edmond_karp(3, first)
-    return(len(reachable) * (total-len(reachable)))
+    return(reachable * (total-reachable))
 
 print(parse())
 print(part1())

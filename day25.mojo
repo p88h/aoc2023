@@ -8,7 +8,7 @@ alias maxn = 1600
 
 @always_inline
 fn encode(s: StringSlice, inout mapp: Array[DType.int16]) -> Int:
-    alias orda = ord('a') 
+    alias orda = ord("a")
     var ret = 0
     for i in range(s.size):
         ret = ret * 26 + (s[i].to_int()) - orda
@@ -29,9 +29,9 @@ fn link(a: Int, b: Int, inout graph: Array[DType.int16]):
 fn main() raises:
     let f = open("day25.txt", "r")
     let lines = make_parser["\n"](f.read())
-    let enc = Array[DType.int16](26*26*26)
-    let graph = Array[DType.int16](maxn*maxc)
-    let marks = Array[DType.int8](maxn*maxn)
+    let enc = Array[DType.int16](26 * 26 * 26)
+    let graph = Array[DType.int16](maxn * maxc)
+    let marks = Array[DType.int8](maxn * maxn)
     let prev = Array[DType.int16](maxn)
     let work = Array[DType.int16](maxn)
 
@@ -41,8 +41,8 @@ fn main() raises:
         for l in range(lines.length()):
             let line = lines[l]
             let src = encode(line[0:3], enc)
-            for k in range(5,line.size,4):
-                let dst = encode(line[k:k+3], enc)
+            for k in range(5, line.size, 4):
+                let dst = encode(line[k : k + 3], enc)
                 # print(line[0:3],src,line[k:k+3],dst)
                 link(src, dst, graph)
         return enc[0].to_int()
@@ -50,7 +50,7 @@ fn main() raises:
     # compute a bfs path from src to tgt
     # if tgt not specified, a path to somewhere farthest from src.
     @parameter
-    fn bfs(src: Int, tgt : Int = -1) -> Int:
+    fn bfs(src: Int, tgt: Int = -1) -> Int:
         prev.clear(-1)
         work[0] = src
         prev[src] = 0
@@ -84,7 +84,6 @@ fn main() raises:
     fn edmond_karpik(cnt: Int, src: Int) -> Int:
         marks.clear()
         var tgt = -1
-        var fcnt = 0
         for i in range(cnt):
             let plen = bfs(src, tgt)
             var pre = work[0].to_int()
@@ -93,32 +92,14 @@ fn main() raises:
                 let cur = work[i].to_int()
                 marks[cur * maxn + pre] = marks[pre * maxn + cur] = 1
                 pre = cur
-                # remember this link in prev list
-                prev[fcnt] = pre
-                prev[fcnt+1] = cur
-                fcnt += 2
-    
-        # Compute the reachable nodes in residual graph
-        let rlen = bfs(src, tgt)
-        for i in range(rlen):
-            let cur = work[i].to_int()
-            marks[cur] = 1
-        
-        # Identify the cut and restore all other edges
-        for i in range(0,fcnt,2):
-            let a = work[i].to_int()
-            let b = work[i+1].to_int()
-            if marks[a] == marks[b]:
-                marks[a * maxn + b] = marks[b * maxn + a] = 0 
-        # Compute the size of the reachable cluster
-        let reachable = bfs(src, tgt)
-        return reachable
 
+        # Compute the reachable nodes in residual graph
+        return bfs(src, tgt)
 
     @parameter
     fn part1() -> Int64:
-        let start = encode(lines[0][0:3],enc)
-        let reachable =  edmond_karpik(3, start)
+        let start = encode(lines[0][0:3], enc)
+        let reachable = edmond_karpik(3, start)
         return reachable * (enc[0].to_int() - reachable)
 
     minibench[parse]("parse")

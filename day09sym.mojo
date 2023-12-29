@@ -83,7 +83,7 @@ struct VecMatrix:
             # Mojo doesn't even do AVX512, so this breaks down to 4x8-wide ops with AVX2.
             # Or equivalent. Manually doing 3x8 is a tiny bit faster but too
             # complicated)
-            acc += self.nums.aligned_simd_load[32, 32](i * 32) * mult
+            acc = self.nums.aligned_simd_load[32, 32](i * 32).fma(mult, acc)
         return acc.reduce_add().to_int()
 
 

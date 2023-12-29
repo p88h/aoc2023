@@ -54,19 +54,19 @@ def dfs2(x, y, visited, prev, last, steps, branches, graph):
 def dfs3(cur, path, steps, graph):
     if cur == 1:
         return steps
-    path[cur] = 1
+    path |= 1 << cur
     best = 0
     for dst, add in graph[cur]:
-        if not path[dst]:
+        if not path & (1 << dst):
             best = max(best, dfs3(dst, path, steps + add, graph))
-    path[cur] = 0
+    path ^= 1 << cur
     return best
 
 def part2():
     branches = {(sx, sy): 0, (fx, fy): 1}
     graph = [[], []]
     dfs2(sx, sy + 1, set(), (sx, sy), 0, 1, branches, graph)
-    return dfs3(0, [0] * len(graph), 0, graph)
+    return dfs3(0, 0, 0, graph)
 
 print(part1())
 print(part2())

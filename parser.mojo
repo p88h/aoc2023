@@ -1,4 +1,5 @@
 from collections.vector import DynamicVector
+from wrappers import minibench
 
 @value
 struct StringSlice(CollectionElement, Stringable):
@@ -159,7 +160,7 @@ fn make_parser[sep: StringLiteral](s: StringSlice, skip_empty: Bool = True) -> P
     return make_parser[ord(sep)](s, skip_empty)
 
 # small tests
-fn main():
+fn main() raises:
     let a = make_parser[10]("abc\ndef\nghi")
     for i in range(a.length()):
         print(a.get(i).get())
@@ -184,4 +185,25 @@ fn main():
     let n = make_parser[32]("1 2 3")
     for i in range(n.length()):
         print(atoi(n[i]))
+
+    let sf = open("day13.txt", "r").read()
+
+    @parameter
+    fn splitParse() -> Int64 :
+        try:
+            let lines = sf.split("\n")
+            return len(lines)
+        except:
+            return 0
+        
+
+    @parameter
+    fn customParse() -> Int64:
+        let lines = make_parser["\n"](sf, False)
+        return lines.length()
+
+    minibench[splitParse]("string.split")
+    minibench[customParse]("make_parser")
+    
+    
 

@@ -4,6 +4,8 @@ from collections.vector import DynamicVector
 from math import min, max
 from memory import memset
 from wrappers import minibench
+from math.bit import ctpop
+
 
 alias intptr = DTypePointer[DType.int32]
 
@@ -31,7 +33,7 @@ fn matches(t: Tuple[SIMD[DType.uint8, 16], SIMD[DType.uint8, 16]]) -> Int:
     let win: SIMD[DType.uint8, 16]
     let hand: SIMD[DType.uint8, 16]
     (win, hand) = t
-    return bitcnt(win & hand)
+    return ctpop(win & hand).reduce_add().to_int()
 
 @always_inline
 fn main() raises:

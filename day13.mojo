@@ -1,6 +1,7 @@
 from parser import *
 from wrappers import minibench
 from array import Array
+from math.bit import ctpop
 
 # Popcnt based on https://en.wikipedia.org/wiki/Hamming_weight
 fn popcnt(v: SIMD[DType.int32, 1]) -> Int:
@@ -43,10 +44,13 @@ fn main() raises:
     fn find_match_dirty(ofs: Int, size: Int) -> Int64:
         for i in range(1, size):
             var b = 0
-            var tbb = 1
-            while i > b and i + b < size and popcnt(mats[ofs + i - b - 1] ^ mats[ofs + i + b]) <= tbb:
+            var tbb : Int32 = 1
+            while i > b and i + b < size:
+                let pc = ctpop(mats[ofs + i - b - 1] ^ mats[ofs + i + b]) 
+                if pc > tbb:
+                    break
                 # apparently compiler is smart enough to not compute this
-                tbb -= popcnt(mats[ofs + i - b - 1] ^ mats[ofs + i + b])
+                tbb -= pc
                 b += 1
             if tbb == 0 and (i == b or i + b == size):
                 return i

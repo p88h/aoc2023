@@ -1,6 +1,7 @@
 from parser import *
 from math import sqrt
 from wrappers import minibench
+from algorithm.sort import sort
 
 # Converts the hand (passed in the ss) to a integer value representaion
 # high-ish bits represent the rank, low-ish represent the cards themselves
@@ -120,7 +121,8 @@ fn main() raises:
             let score = atoi(tokens.get(l * 2 + 1)).to_int()
             let code = rank[joke](hand, mapp)
             codes.push_back(code * 1024 + score)
-        heapsort(codes)
+        sort(codes)
+        #heapsort(codes)
         var p = codes.size
         var s = 0
         for i in range(codes.size):

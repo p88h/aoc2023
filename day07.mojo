@@ -2,6 +2,7 @@ from parser import *
 from math import sqrt
 from wrappers import minibench
 from algorithm.sort import sort
+from array import Array
 
 # Converts the hand (passed in the ss) to a integer value representaion
 # high-ish bits represent the rank, low-ish represent the cards themselves
@@ -9,64 +10,60 @@ from algorithm.sort import sort
 # Card ranking is injected via the mapp pointer which is actually a 
 # mapping from character values to indexes. 
 fn rank[joke: Int](ss: StringSlice, mapp: Pointer[Int]) -> Int:
-    var counts = DynamicVector[Int](16)
-    var k = DynamicVector[Int](5)
-
-    @unroll
-    for i in range(16):
-        counts.push_back(0)
+    var counts = Array[DType.int16](16, 1)
     var r = 0
-    k.push_back(0)
+
     # Compute the counts of cards, and the card value index by iterating 
     # through the hand. counts keeps track of occurances of each card;
-    # and k counts groups of cards (how many groups of size 1..5)
     @unroll
     for p in range(5):
-        let c = mapp.load(ss[p].to_int())
-        k.push_back(0)
-        k[counts[c]] -= 1
+        let c = mapp[ss[p].to_int()]
         counts[c] += 1
-        k[counts[c]] += 1
         r = r * 14 + c
     # Joker code
     let jc = mapp.load(74)
     # ideally this should be optimized out if joke = 0 at compile time
     let j = counts[jc] * joke
     var s = 6
+    # This allows us to determine the top card counts. 
+    # counts are all +1 to make them non-zero
+    # the possible values are: 
+    # 5:0 - 6, 4:1 - 10, 3:2 - 12, 3:1:1 - 16, 2:2:1 - 18, 2:1:1:1 - 24, 1:1:1:1:1 - 32
+    let kpro = counts.aligned_simd_load[16](0).reduce_mul()
     # 5-of-a-kind -> there is a group of count 5
-    if k[5] > 0:
+    if kpro == 6:
         s = 0
     # Same for 4-of-a-kind, can be upgraded to 5 with a joker
-    elif k[4] > 0:
+    elif kpro == 10:
         s = 1
-        if j > 0:
+        if j > 1:
             s = 0
     # Full house, becomes five of a kind with a joker 
     # since the joker has to be either the 3-group or 2-group
-    elif (k[3] > 0) and (k[2] > 0):
+    elif kpro == 12:
         s = 2
-        if j > 0:
+        if j > 1:
             s = 0
     # Three of a kind, becomes four-of-a-kind with a joker
-    elif k[3] > 0:
+    elif kpro == 16:
         s = 3
-        if j > 0:
+        if j > 1:
             s = 1
     # Two pairs. Can become either a full-house with one joker
     # or four-of-a-kind with two.
-    elif k[2] > 1:
+    elif kpro == 18:
         s = 4
-        if j == 1:
+        if j == 2:
             s = 2
-        elif j == 2:
+        elif j == 3:
             s = 1
     # One pair. Can become a three with a joker.
-    elif k[2] > 0:
+    elif kpro == 24:
         s = 5
-        if j > 0:
+        if j > 1:
             s = 3        
     # If everything is single, but we have a joker, that makes a pair. 
-    elif j > 0:
+    elif j > 1:
         s = 5
     # 537824 = 14 ^ 5, the range for card index value. 
     return s * 537824 + r

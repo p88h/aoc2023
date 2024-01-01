@@ -23,35 +23,35 @@ struct MicroSet:
     fn contains(self, code: Int8) -> Bool:
         return self.bits & (1 << (code.to_int() & 0x1F)) != 0
 
-
-struct MicroMap:
+@value
+struct MicroMap[VType: DType, width: Int](CollectionElement):
     """
     This MicroMap allows to assign some integer value to characters.
     Works just like MicroSet, but with values.
     Stores data in a SIMD vector. Which is probably an overkill.
     """
 
-    var items: DTypePointer[DType.int8]
+    var items: DTypePointer[VType]
 
     fn __init__(inout self):
-        self.items = DTypePointer[DType.int8].aligned_alloc(4, 128)
+        self.items = DTypePointer[VType].aligned_alloc(32, 128)
         memset(self.items, 0, 128)
 
     fn __del__(owned self):
         self.items.free()
 
-    fn __getitem__(self, key: Int8) -> SIMD[DType.int8, 4]:
-        let ofs = (key.to_int() & 0x1F) * 4
-        return self.items.aligned_simd_load[4, 4](ofs)
+    fn __getitem__(self, key: Int8) -> SIMD[VType, width]:
+        let ofs = (key.to_int() & 0x1F) * width
+        return self.items.aligned_simd_load[width, 32](ofs)
 
-    fn __getitem__(self, key: String) -> SIMD[DType.int8, 4]:
+    fn __getitem__(self, key: String) -> SIMD[VType, width]:
         return self[key._buffer[0]]
 
-    fn __setitem__(inout self, key: Int8, value: SIMD[DType.int8, 4]):
-        let ofs = (key.to_int() & 0x1F) * 4
-        self.items.aligned_simd_store[4, 4](ofs, value)
+    fn __setitem__(inout self, key: Int8, value: SIMD[VType, width]):
+        let ofs = (key.to_int() & 0x1F) * width
+        self.items.aligned_simd_store[width, 32](ofs, value)
 
-    fn __setitem__(inout self, key: String, value: SIMD[DType.int8, 4]):
+    fn __setitem__(inout self, key: String, value: SIMD[VType, width]):
         self[key._buffer[0]] = value
 
 
@@ -60,6 +60,18 @@ fn main() raises:
     let lines = make_parser['\n'](f.read())
     let distance = DTypePointer[DType.int32].alloc(lines.length() * 256)
     var sum = Atomic[DType.int64](0)
+
+    alias map_type = DType.int16
+
+    fn build_dirmap() -> MicroMap[map_type, 4]:
+        var mapping = MicroMap[map_type, 4]()
+        mapping["7"] = SIMD[map_type, 4](0, -1, 1, 0)
+        mapping["J"] = SIMD[map_type, 4](0, -1, -1, 0)
+        mapping["-"] = SIMD[map_type, 4](0, 1, 0, -1)
+        mapping["L"] = SIMD[map_type, 4](0, 1, -1, 0)
+        mapping["F"] = SIMD[map_type, 4](1, 0, 0, 1)
+        mapping["|"] = SIMD[map_type, 4](1, 0, -1, 0)
+        return mapping ^
 
     @parameter
     fn part1() -> Int64:
@@ -77,22 +89,20 @@ fn main() raises:
         distance[start] = 1
         # Figure out where to go from here, looking at neighbors.
         var current = start
-        if MicroSet("J-7").contains(lines[sy][sx + 1]):
+        alias h1 = MicroSet("J-7")
+        if h1.contains(lines[sy][sx + 1]):
             current = (sy << 8) + sx + 1
-        if MicroSet("L-F").contains(lines[sy][sx - 1]):
+        alias h2 = MicroSet("L-F")
+        if h2.contains(lines[sy][sx - 1]):
             current = (sy << 8) + sx - 1
-        if MicroSet("F|7").contains(lines[sy - 1][sx]):
+        alias v1 = MicroSet("F|7")
+        if v1.contains(lines[sy - 1][sx]):
             current = ((sy - 1) << 8) + sx
-        if MicroSet("L|J").contains(lines[sy + 1][sx]):
+        alias v2 = MicroSet("L|J")
+        if v2.contains(lines[sy + 1][sx]):
             current = ((sy + 1) << 8) + sx
         distance[current] = 1
-        var mapping = MicroMap()
-        mapping["7"] = SIMD[DType.int8, 4](0, -1, 1, 0)
-        mapping["J"] = SIMD[DType.int8, 4](0, -1, -1, 0)
-        mapping["-"] = SIMD[DType.int8, 4](0, 1, 0, -1)
-        mapping["L"] = SIMD[DType.int8, 4](0, 1, -1, 0)
-        mapping["F"] = SIMD[DType.int8, 4](1, 0, 0, 1)
-        mapping["|"] = SIMD[DType.int8, 4](1, 0, -1, 0)
+        let mapping = build_dirmap()
         var dst = 1
         var prev = start
         while current != start:

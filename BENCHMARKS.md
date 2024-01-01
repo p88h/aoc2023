@@ -42,8 +42,8 @@ Day09 part2     1.31 ms     0.14 ms     2.01 μs     nan         * 68 - 652
 Day09sym parse  0.34 ms     0.09 ms     0.03 ms     nan         * 2 - 10
 Day09sym part1  0.11 ms     3.66 μs     0.17 μs     nan         * 21 - 618
 Day09sym part2  0.15 ms     5.10 μs     0.17 μs     nan         * 29 - 865
-Day10 part1     1.82 ms     0.61 ms     0.09 ms     nan         * 7 - 21
-Day10 part2     1.25 ms     0.47 ms     0.04 ms     0.01 ms     * 34 - 90
+Day10 part1     1.82 ms     0.61 ms     0.07 ms     nan         * 8 - 24
+Day10 part2     1.25 ms     0.47 ms     0.03 ms     0.01 ms     * 34 - 91
 Day11 part1     1.21 ms     0.19 ms     0.03 ms     nan         * 7 - 48
 Day11 part2     1.25 ms     0.19 ms     0.03 ms     nan         * 7 - 49
 Day11hv part1   0.37 ms     0.11 ms     8.09 μs     nan         * 13 - 45
@@ -83,5 +83,5 @@ Day24 part2     8.20 μs     0.04 ms     0.19 μs     nan         * 197 - 43
 Day25 parse     0.65 ms     0.25 ms     0.01 ms     nan         * 23 - 60
 Day25 part1     1.18 ms     0.72 ms     0.06 ms     nan         * 11 - 18
 
-Total        8197.74 ms  1466.57 ms   178.55 ms    48.87 ms     * 30 - 167
+Total        8197.74 ms  1466.57 ms   178.52 ms    48.85 ms     * 30 - 167
 ```

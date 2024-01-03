@@ -84,32 +84,31 @@ fn main() raises:
         var np = 0
         # take each column
         for x in range(dim):
-            var ofs = 0
+            var pos = SIMD[DType.int32, 2](0, x)
+            alias one = SIMD[DType.int32, 2](1, 0)
             var wp = 0
             var rp = 0
             # if there are any rocks AND pebbles remaining:
-            while wp < pebtmp[128 * x].to_int() and rp < rocks[rpos + 128 * x].to_int():
+            let wcnt = pebtmp[128 * x].to_int()
+            let rcnt = rocks[rpos + 128 * x].to_int()
+            while rp < rcnt:
                 # next rock and pebble y
                 let rocky = rocks[rpos + 128 * x + rp + 1]
-                let pebby = pebtmp[128 * x + wp + 1]
-                # rock is lower than the pebble. consume the rock.
-                # set ofs (next viable pebble position) to rocky + 1
-                if rocky < pebby:
-                    ofs = rocky.to_int() + 1
-                    rp += 1
-                # consume the pebble, shift it to ofs and update ofs
-                else:  # pebby < rocky:
-                    pebbles[np * 2] = ofs
-                    pebbles[np * 2 + 1] = x
-                    np += 1
-                    ofs += 1
+                while wp < wcnt and pebtmp[128 * x + wp + 1] < rocky:
+                    # rock is lower than the pebble. consume the rock.
+                    # set ofs (next viable pebble position) to rocky + 1
+                    pebbles.aligned_simd_store(np, pos)
+                    np += 2
+                    pos += one
                     wp += 1
+                # consume the pebble, shift it to ofs and update ofs
+                pos[0] = rocky.to_int() + 1
+                rp += 1
             # consume remaining pebbles:
             while wp < pebtmp[128 * x].to_int():
-                pebbles[np * 2] = ofs
-                pebbles[np * 2 + 1] = x
-                np += 1
-                ofs += 1
+                pebbles.aligned_simd_store(np, pos)
+                np += 2
+                pos += one
                 wp += 1
 
     fn load(ppos: Array[DType.int32], m: Int) -> Int:
@@ -127,10 +126,11 @@ fn main() raises:
     # 32-bit FNV1a hash of the positions.
     # Each value is already in byte range.
     fn fnv1a(ppos: Array[DType.int32]) -> Int:
-        var hash: Int32 = 2166136261
-        for i in range(ppos.size):
-            hash = (hash ^ ppos[i]) * 16777619
-        return hash.to_int()
+        var hash = SIMD[DType.int32, 8](2166136261)
+        for i in range(0, ppos.size, 8):
+            let vals = ppos.aligned_simd_load[8](i)
+            hash = (hash ^ vals) * 16777619
+        return hash.reduce_mul[1]().to_int()
 
     @parameter
     fn part2() -> Int64:

@@ -31,9 +31,10 @@ fn main() raises:
     let lines = make_parser["\n"](f.read())
     let enc = Array[DType.int16](26 * 26 * 26)
     let graph = Array[DType.int16](maxn * maxc)
-    let marks = Array[DType.int8](maxn * maxn)
+    let marks = Array[DType.int32](maxn * maxn)
     let prev = Array[DType.int16](maxn)
     let work = Array[DType.int16](maxn)
+    var mark = 1
 
     @parameter
     fn parse() -> Int64:
@@ -63,7 +64,7 @@ fn main() raises:
                 break
             for di in range(graph[cur * maxc]):
                 let dst = graph[cur * maxc + 1 + di].to_int()
-                if marks[cur * maxn + dst] == 0 and prev[dst] < 0:
+                if marks[cur * maxn + dst] != mark and prev[dst] < 0:
                     prev[dst] = cur
                     work[ss] = dst
                     ss += 1
@@ -82,7 +83,7 @@ fn main() raises:
     # then identify the cut and compute the subgraphs
     @parameter
     fn edmond_karpik(cnt: Int, src: Int) -> Int:
-        marks.clear()
+        mark += 1
         var tgt = -1
         for i in range(cnt):
             let plen = bfs(src, tgt)
@@ -90,7 +91,7 @@ fn main() raises:
             tgt = pre
             for i in range(1, plen):
                 let cur = work[i].to_int()
-                marks[cur * maxn + pre] = 1
+                marks[cur * maxn + pre] = mark
                 pre = cur
 
         # Compute the reachable nodes in residual graph

@@ -62,10 +62,25 @@ def dfs3(cur, path, steps, graph):
     path ^= 1 << cur
     return best
 
+def bfstrim(start, graph):
+    stak = [ start ]
+    while stak:
+        next = []
+        for cur in stak:            
+            for dst,_ in graph[cur]:
+                if len(graph[dst]) == 3:
+                    for (t,d) in graph[dst]:
+                        if t == cur:
+                            tod = (t,d)
+                    graph[dst].remove(tod)
+                    next.append(dst)
+        stak = next
+
 def part2():
     branches = {(sx, sy): 0, (fx, fy): 1}
     graph = [[], []]
     dfs2(sx, sy + 1, set(), (sx, sy), 0, 1, branches, graph)
+    bfstrim(0, graph)
     return dfs3(0, 0, 0, graph)
 
 print(part1())

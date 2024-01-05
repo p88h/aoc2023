@@ -78,37 +78,23 @@ fn dfs2(
             dfs2(nx, ny, graph, tiles, x, y, lnk, dimx, dimy, nsteps + 1)
 
 
-fn dfs4(start: Int, borrowed graph: Array[DType.int32], inout paths: Array[DType.int32]) -> Int:
-    let n0 = graph[start + 2].to_int()
-    let d0 = graph[start + 2 + 1].to_int()
-    var p = 0
-    for i in range(graph[n0 + 1]):
-        let n1 = graph[n0 + 2 + 2 * i].to_int()
-        let d1 = graph[n0 + 2 + 2 * i + 1].to_int()
-        if n1 == start:
+fn dfs4(cur: Int, tpath: Int, tdst: Int, lim: Int, borrowed graph: Array[DType.int32], inout paths: DynamicVector[Int]):
+    if lim == 0:
+        paths.push_back(cur)
+        paths.push_back(tdst)
+        paths.push_back(tpath)
+        return
+    for i in range(graph[cur + 1]):
+        let next = graph[cur + 2 + 2 * i].to_int()
+        let dist = graph[cur + 2 + 2 * i + 1].to_int()
+        if (tpath & (1 << graph[next].to_int())) != 0:
             continue
-        for j in range(graph[n1 + 1]):
-            let n2 = graph[n1 + 2 + 2 * j].to_int()
-            let d2 = graph[n1 + 2 + 2 * j + 1].to_int()
-            if n2 == n0:
-                continue
-            for k in range(graph[n2 + 1]):
-                let n3 = graph[n2 + 2 + 2 * k].to_int()
-                let d3 = graph[n2 + 2 + 2 * k + 1].to_int()
-                if n3 == n1:
-                    continue
-                paths[p * 4] = n3
-                paths[p * 4 + 1] = d0 + d1 + d2 + d3
-                paths[p * 4 + 2] = (1 << graph[n0]) | (1 << graph[n1]) | (1 << graph[n2])
-                p += 1
-    return p
+        dfs4(next, tpath | (1 << graph[cur].to_int()), tdst + dist, lim - 1, graph, paths)
 
-
-fn bfstrim(start: Int, inout graph: Array[DType.int32], inout stak: Array[DType.int32]):
-    stak[0] = start
+fn bfstrim(start: Int, inout graph: Array[DType.int32], inout stak: DynamicVector[Int]):
     var si: Int = 0
-    var ss: Int = 1
-    while si < ss:
+    stak.push_back(start)
+    while si < stak.size:
         let cur = stak[si]
         si += 1
         for i in range(graph[cur + 1]):
@@ -119,8 +105,7 @@ fn bfstrim(start: Int, inout graph: Array[DType.int32], inout stak: Array[DType.
                         graph[dst + 2 + 2 * j] = graph[dst + 6]
                         graph[dst + 2 + 2 * j + 1] = graph[dst + 7]
                         graph[dst + 1] -= 1
-                stak[ss] = dst
-                ss += 1
+                stak.push_back(dst.to_int())
 
 
 fn dfs3(cur: Int, end: Int, borrowed graph: Array[DType.int32], inout visited: Int64, steps: Int) -> Int:
@@ -145,7 +130,7 @@ fn main() raises:
     let sx = tiles[0].find(cDot)
     let fx = tiles[dimy - 1].find(cDot)
     let work = Array[DType.int32](dimx * dimy * gsize)
-    let tmp = Array[DType.int32](64)
+    let tmp = DynamicVector[Int](2048)
     var dst = Atomic[DType.int32](0)
 
     @parameter
@@ -170,21 +155,23 @@ fn main() raises:
     @parameter
     fn part2_sub(p: Int):
         let end = ((dimy - 1) * dimx + fx) * gsize
-        var vis: Int64 = tmp[p * 4 + 2].to_int()
-        dst.max(dfs3(tmp[p * 4].to_int(), end, work, vis, tmp[p * 4 + 1].to_int()))
+        var vis: Int64 = tmp[p * 3 + 2]
+        dst.max(dfs3(tmp[p * 3], end, work, vis, tmp[p * 3 + 1]))
 
     @parameter
     fn part2_parallel() -> Int64:
-        work.clear()
+        work.clear()        
         let start = sx * gsize
         let end = ((dimy - 1) * dimx + fx) * gsize
         work[start] = 2
         work[end] = 3
         work[0] = 4
         dfs2(sx, 1, work, tiles, sx, 0, start, dimx, dimy, 1)
-        bfstrim(start, work, tmp)
-        let pcnt = dfs4(start, work, tmp)
-        parallelize[part2_sub](pcnt, 10)
+        tmp.clear()
+        bfstrim(start, work, tmp)        
+        tmp.clear()
+        dfs4(start, 0, 0, 10, work, tmp)
+        parallelize[part2_sub](tmp.size // 3, 24)
         return dst.value.to_int()
 
     minibench[part1]("part1")
@@ -192,4 +179,4 @@ fn main() raises:
     minibench[part2_parallel]("part2_parallel")
 
     print(tiles.length(), "tokens", dimx, dimy)
-    print(work.bytecount() + tmp.bytecount(), "work buffers")
+    print(work.bytecount() + tmp.size, "work buffers")

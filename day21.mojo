@@ -89,13 +89,15 @@ fn main() raises:
                 let cp = (y + dimx) * limx + x + dimx
                 if visited[cp] == 0 and not (x + dimx == sx and y + dimy == sy):
                     continue
-                let ofs1 = VariadicList[Tuple[Int, Int]]((-1, 0), (1, 0), (0, -1), (0, 1))
+                alias ofs1 = VariadicList[Tuple[Int, Int]]((-1, 0), (1, 0), (0, -1), (0, 1))
+                @unroll(4)
                 for i in range(4):
                     let np = cp + dimx * ofs1[i].get[0, Int]() + dimx * limx * ofs1[i].get[1, Int]()
                     let cd = visited[np].to_int()
                     let rem = (steps - cd) // dimx
                     total += oddcnt(rem + 1, cd % 2)
-                let ofs2 = VariadicList[Tuple[Int, Int]]((-1, -1), (-1, 1), (1, -1), (1, 1))
+                alias ofs2 = VariadicList[Tuple[Int, Int]]((-1, -1), (-1, 1), (1, -1), (1, 1))
+                @unroll(4)
                 for i in range(4):
                     let np = cp + dimx * ofs2[i].get[0, Int]() + dimx * limx * ofs2[i].get[1, Int]()
                     if visited[np] == 0:

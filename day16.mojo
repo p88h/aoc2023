@@ -11,7 +11,13 @@ fn main() raises:
     let dimx = tiles.length()
     let dimy = tiles[0].size
     let scnt = dimx * 2 + dimy * 2
+    let ignored = Array[DType.int16](1000)
     var mmax = Atomic[DType.int64](0)
+
+    fn bidx(x: Int32, y: Int32) -> Int32:
+        if (y+1) % 111 != 0:
+            return ((x+1)%2)*110+y+1
+        return 220+((y+1)%2)*110+x+1
 
     @parameter
     fn bfs(start: SIMD[DType.int32, 4]) -> Int64:
@@ -23,6 +29,9 @@ fn main() raises:
         var dx: Int32
         var dy: Int32
         (x, y, dx, dy) = (start[0], start[1], start[2], start[3])
+        let b = bidx(x,y)
+        if ignored[b.to_int()] != 0:
+            return 0
         var curs = 4
         var warm = Atomic[DType.int64](0)
         current.data.aligned_simd_store[4, 4](0, start)
@@ -36,6 +45,7 @@ fn main() raises:
                 y += dy
                 # out of bounds
                 if x < 0 or y < 0 or x >= dimx or y >= dimy:
+                    ignored[bidx(x,y).to_int()] = 1
                     continue
                 # if we already _entered_ this tile this way, skip
                 let op = (y * dimx + x).to_int()
@@ -96,12 +106,14 @@ fn main() raises:
 
     @parameter
     fn part2() -> Int64:
+        ignored.clear()
         for i in range(scnt):
             step2(i)
         return mmax.value
 
     @parameter
     fn part2_parallel() -> Int64:
+        ignored.clear()
         parallelize[step2](scnt,24)
         return mmax.value
 
@@ -110,3 +122,4 @@ fn main() raises:
     minibench[part2_parallel]("part2_parallel")
 
     print(tiles.length(), "tokens", dimx, dimy)
+    print(ignored.bytecount(), "temp size")

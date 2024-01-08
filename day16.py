@@ -4,7 +4,9 @@ tiles = open("day16.txt").read().split("\n")
 dimx = len(tiles[0])
 dimy = len(tiles)
 
-def bfs(start):
+def bfs(start, ignored):
+    if start in ignored:
+        return 0
     current = [ start ]
     visited = set()
     warm = set()
@@ -16,6 +18,7 @@ def bfs(start):
             y += dy
             # out of bounds
             if x < 0 or y < 0 or x >= dimx or y >= dimy:
+                ignored.add((x,y,-dx,-dy))
                 continue
             # if we already _entered_ this tile this way, skip
             if (x,y,dx,dy) in visited:
@@ -43,16 +46,17 @@ def bfs(start):
     return len(warm)
 
 def part1():
-    return bfs((-1,0,1,0))
+    return bfs((-1,0,1,0),set())
 
 def part2():
+    ig = set()
     m = 0
     for x in range(dimx):
-        m = max(m, bfs((x,-1,0,1)))
-        m = max(m, bfs((x,dimy,0,-1)))
+        m = max(m, bfs((x,-1,0,1),ig))
+        m = max(m, bfs((x,dimy,0,-1),ig))
     for y in range(dimy):
-        m = max(m, bfs((-1,0,1,0)))
-        m = max(m, bfs((dimx,0,-1,0)))
+        m = max(m, bfs((-1,0,1,0),ig))
+        m = max(m, bfs((dimx,0,-1,0),ig))
     return m
 
 print(part1())

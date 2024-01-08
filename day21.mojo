@@ -56,7 +56,7 @@ fn main() raises:
             let p = y * limx + x
             let distance = visited[p]
             # ... and break here
-            if distance > steps or distance > 2 * dimx + 1:
+            if distance > steps or distance > dimx + dimx // 2 + 1:
                 break
             current += 2
             if dimx == limx and distance % 2 == steps % 2:
@@ -93,6 +93,8 @@ fn main() raises:
                 @unroll(4)
                 for i in range(4):
                     let np = cp + dimx * ofs1[i].get[0, Int]() + dimx * limx * ofs1[i].get[1, Int]()
+                    if visited[np] == 0:
+                        visited[np] = visited[cp] + dimx
                     let cd = visited[np].to_int()
                     let rem = (steps - cd) // dimx
                     total += oddcnt(rem + 1, cd % 2)

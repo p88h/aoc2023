@@ -57,10 +57,10 @@ Day14 part1     0.40 ms     0.07 ms     7.26 μs     nan         * 9 - 55
 Day14 part2     0.27 s      0.05 s      6.66 ms     nan         * 8 - 40
 Day15 part1     1.36 ms     0.16 ms     0.02 ms     nan         * 7 - 63
 Day15 part2     1.70 ms     0.47 ms     0.04 ms     nan         * 10 - 38
-Day16 part1     3.35 ms     2.06 ms     0.05 ms     nan         * 40 - 66
-Day16 part2     0.66 s      0.41 s      0.01 s      1.83 ms     * 223 - 363
-Day17 part1     0.08 s      0.01 s      1.59 ms     nan         * 8 - 49
-Day17 part2     0.20 s      0.04 s      3.47 ms     nan         * 10 - 57
+Day16 part1     3.31 ms     2.06 ms     0.05 ms     nan         * 38 - 62
+Day16 part2     0.56 s      0.35 s      7.81 ms     1.33 ms     * 264 - 426
+Day17 part1     0.05 s      7.18 ms     1.07 ms     nan         * 6 - 45
+Day17 part2     0.11 s      0.02 s      2.34 ms     nan         * 6 - 46
 Day18 part1     0.14 ms     0.03 ms     3.31 μs     nan         * 9 - 41
 Day18 part2     0.23 ms     0.07 ms     3.58 μs     nan         * 19 - 63
 Day19 parse     1.10 ms     0.43 ms     0.04 ms     nan         * 9 - 25
@@ -70,17 +70,17 @@ Day20 parse     0.05 ms     0.02 ms     2.58 μs     nan         * 6 - 18
 Day20 part1     0.02 s      2.11 ms     0.24 ms     nan         * 8 - 75
 Day20 part2     0.07 s      8.31 ms     0.41 ms     nan         * 20 - 171
 Day21 part1     5.63 ms     1.62 ms     0.10 ms     nan         * 15 - 55
-Day21 part2     0.23 s      0.06 s      1.99 ms     nan         * 28 - 117
+Day21 part2     0.23 s      0.06 s      1.43 ms     nan         * 39 - 164
 Day22 parse     1.00 ms     0.82 ms     0.18 ms     nan         * 4 - 5
-Day22 part1     1.42 ms     0.31 ms     0.03 ms     nan         * 11 - 53
-Day22 part2     6.57 ms     0.73 ms     0.11 ms     nan         * 6 - 58
-Day23 part1     0.08 s      0.04 s      2.24 ms     nan         * 15 - 35
-Day23 part2     2.45 s      0.39 s      0.04 s      7.17 ms     * 54 - 341
+Day22 part1     1.42 ms     0.31 ms     0.03 ms     nan         * 11 - 54
+Day22 part2     6.57 ms     0.73 ms     0.11 ms     nan         * 6 - 59
+Day23 part1     0.08 s      0.04 s      2.19 ms     nan         * 16 - 36
+Day23 part2     2.45 s      0.39 s      0.04 s      7.12 ms     * 55 - 344
 Day24 parse     0.27 ms     0.11 ms     0.10 ms     nan         * 1 - 2
-Day24 part1     0.01 s      3.14 ms     0.18 ms     nan         * 17 - 79
-Day24 part2     8.36 μs     0.05 ms     0.29 μs     nan         * 158 - 28
+Day24 part1     0.01 s      3.14 ms     0.18 ms     0.06 ms     * 56 - 253
+Day24 part2     8.36 μs     0.05 ms     0.29 μs     nan         * 160 - 29
 Day25 parse     7.14 μs     4.02 μs     1.18 μs     nan         * 3 - 6
 Day25 part1     1.66 ms     1.16 ms     0.03 ms     nan         * 33 - 47
 
-Total        4356.54 ms  1076.93 ms    76.20 ms    28.54 ms     * 37 - 152
+Total        4135.35 ms   992.45 ms    69.88 ms    25.60 ms     * 38 - 161
 ```

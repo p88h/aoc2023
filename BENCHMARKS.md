@@ -20,9 +20,9 @@ Day01 part1     0.72 ms     0.15 ms     6.43 μs     0.02 ms     * 23 - 111
 Day01 part2     2.82 ms     0.32 ms     0.05 ms     0.03 ms     * 11 - 100
 Day02 part1     0.29 ms     0.10 ms     0.03 ms     8.38 μs     * 12 - 34
 Day02 part2     0.29 ms     0.10 ms     0.03 ms     8.69 μs     * 12 - 32
-Day03 parse     0.63 ms     0.07 ms     0.03 ms     nan         * 2 - 23
-Day03 part1     0.35 ms     0.04 ms     5.45 μs     nan         * 6 - 64
-Day03 part2     0.81 ms     0.05 ms     0.01 ms     nan         * 3 - 60
+Day03 parse     0.63 ms     0.07 ms     0.02 ms     nan         * 4 - 37
+Day03 part1     0.35 ms     0.04 ms     4.65 μs     nan         * 8 - 75
+Day03 part2     0.81 ms     0.05 ms     0.01 ms     nan         * 4 - 70
 Day04 parse     0.42 ms     0.21 ms     0.04 ms     nan         * 5 - 11
 Day04 part1     0.08 ms     0.04 ms     0.16 μs     nan         * 277 - 511
 Day04 part2     0.12 ms     0.04 ms     0.39 μs     nan         * 115 - 312
@@ -31,8 +31,8 @@ Day05 part1     0.05 ms     3.94 μs     1.83 μs     nan         * 2 - 26
 Day05 part2     0.22 ms     0.11 ms     5.67 μs     nan         * 18 - 39
 Day06 part1     1.40 μs     0.21 μs     0.09 μs     nan         * 2 - 15
 Day06 part2     0.58 μs     0.20 μs     0.05 μs     nan         * 3 - 11
-Day07 part1     1.07 ms     0.48 ms     0.03 ms     nan         * 16 - 36
-Day07 part2     1.10 ms     0.50 ms     0.03 ms     nan         * 16 - 36
+Day07 part1     1.07 ms     0.48 ms     0.02 ms     nan         * 23 - 50
+Day07 part2     1.10 ms     0.50 ms     0.02 ms     nan         * 23 - 52
 Day08 parse     0.15 ms     0.06 ms     2.72 μs     nan         * 21 - 56
 Day08 part1     0.47 ms     0.05 ms     0.02 ms     nan         * 2 - 23
 Day08 part2     4.48 ms     1.29 ms     0.17 ms     0.04 ms     * 29 - 103
@@ -83,5 +83,5 @@ Day24 part2     8.20 μs     0.04 ms     0.19 μs     nan         * 197 - 43
 Day25 parse     0.65 ms     0.25 ms     0.01 ms     nan         * 23 - 60
 Day25 part1     1.18 ms     0.72 ms     0.03 ms     nan         * 22 - 36
 
-Total        2931.53 ms   622.46 ms    53.25 ms    19.95 ms     * 31 - 146
+Total        2931.53 ms   622.46 ms    53.22 ms    19.92 ms     * 31 - 147
 ```

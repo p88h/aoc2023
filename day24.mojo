@@ -2,6 +2,7 @@ from parser import *
 from wrappers import minibench
 from array import Array
 from math import abs,round
+from algorithm import parallelize
 
 fn gauss[n: Int](inout a: Array[DType.float64]) -> SIMD[DType.float64, 8]:
     var h = 0
@@ -48,6 +49,8 @@ fn main() raises:
     let f = open("day24.txt", "r")
     let lines = make_parser["\n"](f.read())
     let params = Array[DType.float64](4096)
+    let count = lines.length()
+    var asum = Atomic[DType.int32](0)
 
     @parameter
     fn parse() -> Int64:
@@ -57,28 +60,39 @@ fn main() raises:
         return lines.length()
 
     @parameter
-    fn part1() -> Int64:
-        let num = lines.length()
+    fn part1_sub(i: Int):
         alias r1 = 200000000000000
         alias r2 = 400000000000000
-        var count = 0
-        for i in range(num):
-            let p1 = params.aligned_simd_load[8](i * 8)
-            let a1 = p1[4] / p1[3]
-            let b1 = p1[1] - a1 * p1[0]
-            for j in range(i + 1, num):
-                let p2 = params.aligned_simd_load[8](j * 8)
-                let a2 = p2[4] / p2[3]
-                let b2 = p2[1] - a2 * p2[0]
-                if a1 == a2:
-                    continue
-                let x = (b2 - b1) / (a1 - a2)
-                let y = a1 * x + b1
-                let t1 = (x - p1[0]) / p1[3]
-                let t2 = (x - p2[0]) / p2[3]
-                if t1 > 0 and t2 > 0 and x >= r1 and x <= r2 and y >= r1 and y <= r2:
-                    count += 1
-        return count
+        let p1 = params.aligned_simd_load[8](i * 8)
+        let a1 = p1[4] / p1[3]
+        let b1 = p1[1] - a1 * p1[0]
+        var cnt = 0
+        for j in range(i + 1, count):
+            let p2 = params.aligned_simd_load[8](j * 8)
+            let a2 = p2[4] / p2[3]
+            let b2 = p2[1] - a2 * p2[0]
+            if a1 == a2:
+                continue
+            let x = (b2 - b1) / (a1 - a2)
+            let y = a1 * x + b1
+            let t1 = (x - p1[0]) / p1[3]
+            let t2 = (x - p2[0]) / p2[3]
+            if t1 > 0 and t2 > 0 and x >= r1 and x <= r2 and y >= r1 and y <= r2:
+                cnt += 1
+        asum += cnt
+
+    @parameter
+    fn part1() -> Int64:
+        asum = 0
+        for i in range(count):
+            part1_sub(i)
+        return asum.value.to_int()
+
+    @parameter
+    fn part1_parallel() -> Int64:
+        asum = 0
+        parallelize[part1_sub](count, 24)
+        return asum.value.to_int()
 
     @parameter
     fn part2() -> Int64:
@@ -108,6 +122,7 @@ fn main() raises:
 
     minibench[parse]("parse")
     minibench[part1]("part1")
+    minibench[part1_parallel]("part1_parallel")
     minibench[part2]("part2")
 
     print(lines.length(), "lines")

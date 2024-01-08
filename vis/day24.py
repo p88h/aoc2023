@@ -13,9 +13,11 @@ def parse(lines):
         stones.append(nums)
     return stones
 
-def project2d(x, y, z):
-    xp = (x + y) / math.sqrt(2)
-    yp = (x - 2 * z - y) / math.sqrt(6)
+def project2d(x, y, z, phi = 0):
+    x1 = x * math.cos(phi) + y * math.sin(phi)
+    y1 = -x * math.sin(phi) + y * math.cos(phi)
+    xp = (x1 + y1) / math.sqrt(2)
+    yp = (x1 - 2 * z - y1) / math.sqrt(6)
     return (int(xp), int(yp))
 
 
@@ -48,36 +50,39 @@ def collider(stones):
     return np.linalg.solve(A, x)    
 
 class Background:
+    tidx = 0
+    fidx = 0
+    minx = None
+    miny = None 
+
     def __init__(self, stones) -> None:
         self.stones = stones
-        self.tidx = 0
         self.speed = 1000000000
-        self.miny = 1000
-        self.minx = 1000
-        self.fidx = 0
-        self.coll = collider(stones)
-        for stone in self.stones:
-            sx, sy, sz = [stone[i]/434197082915  for i in range(3)]
-            (x, y) = project2d(sx, sy, sz)
-            self.miny = min(y, self.miny)
-            self.minx = min(x, self.minx)
+        self.coll = collider(stones)        
     
     def shift(self, p):
         (x, y) = p
-        return (x - self.minx + 300, y - self.miny)
+        return (x - self.minx + 500, y - self.miny + 200)
 
     def update(self, view, controller):
         if not controller.animate:
             return
+        phi = math.pi * self.fidx / 750
         view.win.fill((0, 0, 0, 0))
+        pixels = []
         for stone in self.stones:
-            sx, sy, sz = [(stone[i] + (stone[i+3] * self.tidx))/434197082915 for i in range(3)]
-            (x, y) = self.shift(project2d(sx, sy, sz))
+            sx, sy, sz = [(stone[i] + (stone[i+3] * self.tidx))/434197082915 - 500 for i in range(3)]
+            pixels.append(project2d(sx, sy, sz, phi))
+        if not self.minx:
+            self.minx = min([x for (x,_) in pixels])
+            self.miny = min([y for (_,y) in pixels])
+        for p in pixels:
+            (x,y) = self.shift(p)
             gfxdraw.pixel(view.win, x, y, (255,255,255))
-        cx, cy, cz = [(self.coll[i])/434197082915 for i in range(3)]
-        start = self.shift(project2d(cx,cy,cz))
-        cx, cy, cz = [(self.coll[i] + (self.coll[i+3] * self.tidx))/434197082915 for i in range(3)]
-        end = self.shift(project2d(cx,cy,cz))
+        cx, cy, cz = [(self.coll[i])/434197082915 - 500 for i in range(3)]
+        start = self.shift(project2d(cx,cy,cz, phi))
+        cx, cy, cz = [(self.coll[i] + (self.coll[i+3] * self.tidx))/434197082915 - 500 for i in range(3)]
+        end = self.shift(project2d(cx,cy,cz, phi))
         pygame.draw.line(view.win, (0xff,0xcd,0x3c), start, end)
         (ex, ey) = end
         pygame.draw.circle(view.win, (0xff,0xcd,0x3c), (ex+1,ey+1), 2)

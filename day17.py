@@ -1,3 +1,4 @@
+import math
 from benchy import minibench
 
 lines = open("day17.txt").read().split("\n")
@@ -33,6 +34,11 @@ def bfs(minrun,maxrun):
             if count[y * dimx + x] > maxrun + 1:
                 continue
             if x + y + 22 < maxp:
+                continue
+            cx = abs(x - dimx//2)
+            cy = abs(y - dimy//2)
+            cd = math.sqrt(cx*cx+cy*cy)
+            if cd < dimx // 2 - 7:
                 continue
             if x + y > maxp:
                 maxp = x + y

@@ -1,6 +1,5 @@
 import pygame
-import heapq
-import itertools
+import math
 from collections import defaultdict
 from common import View, Controller
 
@@ -94,8 +93,13 @@ class Board:
                 break
             if self.best[current] < self.distance:
                 continue
-            #if x + y < self.maxs - 30:
-            #    continue 
+            cx = abs(x - self.dimx//2)
+            cy = abs(y - self.dimy//2)
+            cd = math.sqrt(cx*cx+cy*cy)
+            if cd < self.dimx // 2 - 7:
+                continue
+            if x + y < self.maxs - 22:
+                continue 
             for (nx,ny) in [ (-1,0), (1,0), (0,1), (0,-1) ]:
                 nr = 0
                 if (nx,ny) == (-dx,-dy):

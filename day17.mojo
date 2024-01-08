@@ -1,7 +1,7 @@
 from parser import *
 from wrappers import minibench
 from array import Array
-from math import max
+from math import max,abs,sqrt
 
 fn main() raises:
     let f = open("day17.txt", "r")
@@ -55,6 +55,12 @@ fn main() raises:
                     continue
                 # + another heuristic - limit to +-20 in distance from the frontier
                 if x + y + 22 < maxp:
+                    continue
+                # finally, completely cut out the middle circle.
+                let cx = abs(x - dimx//2)
+                let cy = abs(y - dimx//2)
+                let cd = sqrt(cx*cx+cy*cy)
+                if cd < dimx // 2 - 7:
                     continue
                 if x + y > maxp:
                     maxp = x + y

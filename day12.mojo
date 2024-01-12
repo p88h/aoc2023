@@ -88,21 +88,29 @@ fn main() raises:
     var sum1 = Atomic[DType.int64](0)
     var sum2 = Atomic[DType.int64](0)
 
+    alias chunk_size = 20
+
+    @parameter
+    fn chunk_step(i: Int, mult: Int = 1) -> Int64:
+        var lsum : Int64 = 0
+        for j in range(chunk_size):
+            var solver = Solver(lines[i * chunk_size + j], mult)
+            lsum += solver.count(0, 0)
+        return lsum
+
     @parameter
     fn step1(i : Int):
-        var solver = Solver(lines[i])
-        sum1 += solver.count(0, 0)
+        sum1 += chunk_step(i, 1)
 
     @parameter
     fn step2(i : Int):
-        var solver = Solver(lines[i], 5)
-        sum2 += solver.count(0, 0)
+        sum2 += chunk_step(i, 5)
 
     @parameter
     fn results():
         print(sum1.value.to_int())
         print(sum2.value.to_int())
 
-    run_multiline_task[step1, step2](lines.length(), results, 6)
+    run_multiline_task[step1, step2](lines.length() // chunk_size, results, 24)
 
     print(lines.length(), "lines")

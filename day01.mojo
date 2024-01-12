@@ -63,26 +63,31 @@ fn main() raises:
     alias zero = ord('0')
     alias nine = ord('9')
 
+    alias chunk_size = 20
+
     # This function processes a single line of the input for task one and increments the sum as needed.
     @parameter
-    fn digitize1(l: Int):
-        let s = p.get(l)
-        var d1 = 0
-        var d2 = 0
-        # Check forward to find first digit
-        for i in range(s.size):
-            let c = s[i].to_int()
-            if c >= zero and c <= nine:
-                d1 = c - zero
-                break
-        # Check backward to find last digit
-        for i in range(s.size - 1, -1, -1):
-            let c = s[i].to_int()
-            if c >= zero and c <= nine:
-                d2 = c - zero
-                break
-        # That's it
-        a1 += d1 * 10 + d2
+    fn digitize1(i: Int):
+        var lsum = 0
+        for l in range(i*chunk_size, (i+1)*chunk_size):
+            let s = p.get(l)
+            var d1 = 0
+            var d2 = 0
+            # Check forward to find first digit
+            for i in range(s.size):
+                let c = s[i].to_int()
+                if c >= zero and c <= nine:
+                    d1 = c - zero
+                    break
+            # Check backward to find last digit
+            for i in range(s.size - 1, -1, -1):
+                let c = s[i].to_int()
+                if c >= zero and c <= nine:
+                    d2 = c - zero
+                    break
+            # That's it
+            lsum += d1 * 10 + d2
+        a1 += lsum
 
     # Construct matchers for all words. When looking backwards, the words have to be reversed.
     # Fun fact - VariadicList apparently can hold literals, but cannot hold Strings.
@@ -94,39 +99,41 @@ fn main() raises:
     # Similar to the part 1, this does the digits checks and also uses the multi-matchers
     # to find words.
     @parameter
-    fn digitize2(l: Int):
-        let s = p.get(l)
-        var d1 = 0
-        var d2 = 0
-        # last four characters code
-        var l4: Int32 = 0
-        for i in range(s.size):
-            let c = s[i].to_int()
-            var d = -1
-            if c >= zero and c <= nine:
-                d = c - zero
-            else:
-                d = m.check(c, l4)
-            # update code
-            l4 = (l4 << 8) + c
-            if d >= 0:
-                d1 = d
-                break
-        l4 = 0
-        for i in range(s.size - 1, -1, -1):
-            let c = s[i].to_int()
-            var d = -1
-            if c >= zero and c <= nine:
-                d = c - zero
-            else:
-                d = r.check(c, l4)
-            # update code
-            l4 = (l4 << 8) + c
-            if d >= 0:
-                d2 = d
-                break
-
-        a2 += d1 * 10 + d2
+    fn digitize2(i: Int):
+        var lsum = 0
+        for l in range(i*chunk_size, (i+1)*chunk_size):
+            let s = p.get(l)
+            var d1 = 0
+            var d2 = 0
+            # last four characters code
+            var l4: Int32 = 0
+            for i in range(s.size):
+                let c = s[i].to_int()
+                var d = -1
+                if c >= zero and c <= nine:
+                    d = c - zero
+                else:
+                    d = m.check(c, l4)
+                # update code
+                l4 = (l4 << 8) + c
+                if d >= 0:
+                    d1 = d
+                    break
+            l4 = 0
+            for i in range(s.size - 1, -1, -1):
+                let c = s[i].to_int()
+                var d = -1
+                if c >= zero and c <= nine:
+                    d = c - zero
+                else:
+                    d = r.check(c, l4)
+                # update code
+                l4 = (l4 << 8) + c
+                if d >= 0:
+                    d2 = d
+                    break
+            lsum += d1 * 10 + d2
+        a2 += lsum
 
     @parameter
     fn results():
@@ -134,7 +141,7 @@ fn main() raises:
         print(a2.value.to_int())
 
     # this wraps executing the step functions, benchmarking them etc.
-    run_multiline_task[digitize1, digitize2](p.length(), results, 12)
+    run_multiline_task[digitize1, digitize2](p.length() // chunk_size, results, 24)
 
     # While this looks like debug info, Mojo actually sometimes forgets I need the parser in all these step
     # tasks, and happily crashes rather than keeping it around. This holds it in place until that happens.

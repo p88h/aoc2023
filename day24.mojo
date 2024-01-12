@@ -59,39 +59,42 @@ fn main() raises:
             params.aligned_simd_store[8](l*8, p)
         return lines.length()
 
+    alias chunk_size = 6
+
     @parameter
-    fn part1_sub(i: Int):
+    fn part1_sub(o: Int):
         alias r1 = 200000000000000
         alias r2 = 400000000000000
-        let p1 = params.aligned_simd_load[8](i * 8)
-        let a1 = p1[4] / p1[3]
-        let b1 = p1[1] - a1 * p1[0]
         var cnt = 0
-        for j in range(i + 1, count):
-            let p2 = params.aligned_simd_load[8](j * 8)
-            let a2 = p2[4] / p2[3]
-            let b2 = p2[1] - a2 * p2[0]
-            if a1 == a2:
-                continue
-            let x = (b2 - b1) / (a1 - a2)
-            let y = a1 * x + b1
-            let t1 = (x - p1[0]) / p1[3]
-            let t2 = (x - p2[0]) / p2[3]
-            if t1 > 0 and t2 > 0 and x >= r1 and x <= r2 and y >= r1 and y <= r2:
-                cnt += 1
+        for i in range(o*8,o*8+chunk_size):
+            let p1 = params.aligned_simd_load[8](i * 8)
+            let a1 = p1[4] / p1[3]
+            let b1 = p1[1] - a1 * p1[0]
+            for j in range(i + 1, count):
+                let p2 = params.aligned_simd_load[8](j * 8)
+                let a2 = p2[4] / p2[3]
+                let b2 = p2[1] - a2 * p2[0]
+                if a1 == a2:
+                    continue
+                let x = (b2 - b1) / (a1 - a2)
+                let y = a1 * x + b1
+                let t1 = (x - p1[0]) / p1[3]
+                let t2 = (x - p2[0]) / p2[3]
+                if t1 > 0 and t2 > 0 and x >= r1 and x <= r2 and y >= r1 and y <= r2:
+                    cnt += 1
         asum += cnt
 
     @parameter
     fn part1() -> Int64:
         asum = 0
-        for i in range(count):
+        for i in range(count // chunk_size):
             part1_sub(i)
         return asum.value.to_int()
 
     @parameter
     fn part1_parallel() -> Int64:
         asum = 0
-        parallelize[part1_sub](count, 24)
+        parallelize[part1_sub](count // chunk_size, 24)
         return asum.value.to_int()
 
     @parameter

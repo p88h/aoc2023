@@ -15,9 +15,9 @@ fn main() raises:
     var mmax = Atomic[DType.int64](0)
 
     fn bidx(x: Int32, y: Int32) -> Int32:
-        if (y+1) % 111 != 0:
-            return ((x+1)%2)*110+y+1
-        return 220+((y+1)%2)*110+x+1
+        if (y + 1) % 111 != 0:
+            return ((x + 1) % 2) * 110 + y + 1
+        return 220 + ((y + 1) % 2) * 110 + x + 1
 
     @parameter
     fn bfs(start: SIMD[DType.int32, 4]) -> Int64:
@@ -29,7 +29,7 @@ fn main() raises:
         var dx: Int32
         var dy: Int32
         (x, y, dx, dy) = (start[0], start[1], start[2], start[3])
-        let b = bidx(x,y)
+        let b = bidx(x, y)
         if ignored[b.to_int()] != 0:
             return 0
         var curs = 4
@@ -45,7 +45,7 @@ fn main() raises:
                 y += dy
                 # out of bounds
                 if x < 0 or y < 0 or x >= dimx or y >= dimy:
-                    ignored[bidx(x,y).to_int()] = 1
+                    ignored[bidx(x, y).to_int()] = 1
                     continue
                 # if we already _entered_ this tile this way, skip
                 let op = (y * dimx + x).to_int()
@@ -100,21 +100,26 @@ fn main() raises:
     fn part1() -> Int64:
         return bfs(SIMD[DType.int32, 4](-1, 0, 1, 0))
 
+    alias chunk_size = 10
+
     @parameter
     fn step2(i: Int):
-        mmax.max(bfs(start(i)))
+        var lmax: Int64 = 0
+        for j in range(chunk_size):
+            lmax = max(lmax, bfs(start(i * chunk_size + j)))
+        mmax.max(lmax)
 
     @parameter
     fn part2() -> Int64:
         ignored.clear()
-        for i in range(scnt):
+        for i in range(scnt // chunk_size):
             step2(i)
         return mmax.value
 
     @parameter
     fn part2_parallel() -> Int64:
         ignored.clear()
-        parallelize[step2](scnt,24)
+        parallelize[step2](scnt // chunk_size, 24)
         return mmax.value
 
     minibench[part1]("part1")

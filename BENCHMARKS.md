@@ -16,8 +16,8 @@ mojo 0.6.1 (876ded2e)
 
 ```
 Task             Python      PyPy3       Mojo       parallel    * speedup
-Day01 part1     0.72 ms     0.15 ms     6.43 μs     0.02 ms     * 23 - 111
-Day01 part2     2.82 ms     0.32 ms     0.05 ms     0.03 ms     * 11 - 100
+Day01 part1     0.72 ms     0.15 ms     4.41 μs     6.23 μs     * 33 - 163
+Day01 part2     2.82 ms     0.32 ms     0.05 ms     0.01 ms     * 30 - 270
 Day02 part1     0.29 ms     0.10 ms     0.03 ms     8.38 μs     * 12 - 34
 Day02 part2     0.29 ms     0.10 ms     0.03 ms     8.69 μs     * 12 - 32
 Day03 parse     0.63 ms     0.07 ms     0.02 ms     nan         * 4 - 37
@@ -48,8 +48,8 @@ Day11 part1     1.21 ms     0.19 ms     0.03 ms     nan         * 7 - 48
 Day11 part2     1.25 ms     0.19 ms     0.03 ms     nan         * 7 - 49
 Day11hv part1   0.37 ms     0.11 ms     8.09 μs     nan         * 13 - 45
 Day11hv part2   0.37 ms     0.11 ms     8.09 μs     nan         * 13 - 45
-Day12 part1     5.53 ms     1.51 ms     0.36 ms     0.10 ms     * 14 - 52
-Day12 part2     0.12 s      0.03 s      2.75 ms     0.60 ms     * 55 - 194
+Day12 part1     5.53 ms     1.51 ms     0.36 ms     0.06 ms     * 26 - 98
+Day12 part2     0.12 s      0.03 s      2.74 ms     0.37 ms     * 88 - 311
 Day13 parse     0.83 ms     0.09 ms     0.01 ms     nan         * 8 - 76
 Day13 part1     0.14 ms     5.60 μs     1.11 μs     nan         * 5 - 123
 Day13 part2     0.17 ms     0.01 ms     1.53 μs     nan         * 8 - 113
@@ -59,7 +59,7 @@ Day14 part2     0.18 s      0.04 s      5.83 ms     nan         * 6 - 31
 Day15 part1     0.66 ms     0.13 ms     0.01 ms     nan         * 8 - 44
 Day15 part2     1.07 ms     0.31 ms     0.05 ms     nan         * 6 - 22
 Day16 part1     2.86 ms     1.08 ms     0.05 ms     nan         * 23 - 61
-Day16 part2     0.49 s      0.18 s      6.80 ms     1.03 ms     * 175 - 473
+Day16 part2     0.49 s      0.18 s      6.74 ms     0.94 ms     * 190 - 514
 Day17 part1     0.03 s      5.22 ms     1.01 ms     nan         * 5 - 31
 Day17 part2     0.07 s      0.01 s      2.31 ms     nan         * 4 - 31
 Day18 part1     0.10 ms     0.02 ms     2.82 μs     nan         * 7 - 34
@@ -78,10 +78,10 @@ Day22 part2     4.04 ms     0.50 ms     0.08 ms     nan         * 6 - 49
 Day23 part1     0.06 s      0.01 s      1.18 ms     nan         * 12 - 49
 Day23 part2     1.68 s      0.28 s      0.03 s      4.55 ms     * 60 - 368
 Day24 parse     0.17 ms     0.08 ms     0.10 ms     nan         * 0 - 1
-Day24 part1     0.01 s      2.39 ms     0.14 ms     0.03 ms     * 90 - 382
-Day24 part2     8.20 μs     0.04 ms     0.19 μs     nan         * 197 - 43
+Day24 part1     0.01 s      2.39 ms     0.10 ms     0.03 ms     * 73 - 312
+Day24 part2     8.20 μs     0.04 ms     0.19 μs     nan         * 193 - 42
 Day25 parse     0.65 ms     0.25 ms     0.01 ms     nan         * 23 - 60
 Day25 part1     1.18 ms     0.72 ms     0.03 ms     nan         * 22 - 36
 
-Total        2931.53 ms   622.46 ms    53.22 ms    19.92 ms     * 31 - 147
+Total        2931.53 ms   622.46 ms    53.12 ms    19.54 ms     * 31 - 150
 ```

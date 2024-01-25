@@ -28,8 +28,8 @@ fn minibench[fun: fn () capturing -> Int64](label: StringLiteral, loops: Int = 1
     print(fun())
     print(label, ":", avg / div, unit, "(", sloop, "loops ) avg", t // sloop,"mod",t % sloop)
 
-fn run_multiline_task[f1: fn (Int, /) capturing -> None, f2: fn (Int, /) capturing -> None]
-    (len: Int, disp: fn () capturing -> None, workers: Int = 12):
+fn run_multiline_task[f1: fn (Int, /) capturing -> None, f2: fn (Int, /) capturing -> None, disp: fn () capturing -> None]
+    (len: Int, workers: Int = 12):
     @parameter
     fn part1() -> Int64:
         for l in range(len):
@@ -63,22 +63,27 @@ fn run_multiline_task[f1: fn (Int, /) capturing -> None, f2: fn (Int, /) capturi
     
 # test the benchmark accuracy (or, well, sleep acuracy, since you can't sleep for <~100 usec reliably)
 fn main():
+    @parameter
     fn sleep20usec() -> Int64:
         time.sleep(0.00002)
         return 1
 
+    @parameter
     fn sleep100usec() -> Int64:
         time.sleep(0.0001)
         return 1
 
+    @parameter
     fn sleep500usec() -> Int64:
         time.sleep(0.0005)
         return 1
 
+    @parameter
     fn sleep10ms() -> Int64:
         time.sleep(0.01)
         return 1
 
+    @parameter
     fn sleep50ms() -> Int64:
         time.sleep(0.05)
         return 1

@@ -141,7 +141,7 @@ fn main() raises:
         print(a2.value.to_int())
 
     # this wraps executing the step functions, benchmarking them etc.
-    run_multiline_task[digitize1, digitize2](p.length() // chunk_size, results, 24)
+    run_multiline_task[digitize1, digitize2, results](p.length() // chunk_size, 24)
 
     # While this looks like debug info, Mojo actually sometimes forgets I need the parser in all these step
     # tasks, and happily crashes rather than keeping it around. This holds it in place until that happens.

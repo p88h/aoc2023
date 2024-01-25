@@ -88,7 +88,7 @@ fn main() raises:
         print(sum1.value.to_int())
         print(sum2.value.to_int())
 
-    run_multiline_task[step1, step2](lines.length(), results, 24)
+    run_multiline_task[step1, step2, results](lines.length(), 24)
 
     # Same as in part1 - ensure `lines` actually lives through to the end of the program.
     print(lines.length(), "rows")

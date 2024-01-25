@@ -36,7 +36,7 @@ struct Array[AType: DType](CollectionElement):
             self.data.aligned_simd_store[Self.simd_width, Self.simd_width](i * Self.simd_width, initializer)
     
     fn swap(inout self, inout other: Self):
-        (self.data, other.data) = (other.data ^, self.data ^)
+        (self.data, other.data) = (other.data, self.data)
         (self.size, other.size) = (other.size, self.size)
 
     #  Buffer compat

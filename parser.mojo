@@ -116,7 +116,7 @@ struct Parser:
         self.ptr_size = s.size
 
     fn __moveinit__(inout self, owned other: Self):
-        self.contents = other.contents ^
+        self.contents = other.contents
         self.rows = other.rows ^
         self.ptr_size = other.ptr_size
 

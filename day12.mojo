@@ -111,6 +111,6 @@ fn main() raises:
         print(sum1.value.to_int())
         print(sum2.value.to_int())
 
-    run_multiline_task[step1, step2](lines.length() // chunk_size, results, 24)
+    run_multiline_task[step1, step2, results](lines.length() // chunk_size, 24)
 
     print(lines.length(), "lines")

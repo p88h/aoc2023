@@ -13,6 +13,7 @@ fn main() raises:
     let work = Array[DType.int32](maxd*maxq) # dijkstra tables    
 
     # packs into 24-bit representation
+    @parameter
     fn pack(x: Int, y: Int, dir: Int, r: Int) -> Int32:
         return ((y * dimx + x) << 6) + dir * 10 + r
 
@@ -118,3 +119,4 @@ fn main() raises:
 
     print(tiles.length(), "tokens", dimx, dimy)
     print(work.size, "work buffers")
+    print(dimx,dimy)

@@ -1,13 +1,14 @@
 from parser import *
 from wrappers import minibench
 from memory import memset
+from array import Array
+from sys.info import simdwidthof, sizeof
 
 alias simd_width_u32 = simdwidthof[DType.int32]()
 
-
 @value
 struct Matrix2D:
-    var nums: DTypePointer[DType.int32]
+    var nums: Array[DType.int32]
     var rows: Int
     var cols: Int
 
@@ -16,43 +17,39 @@ struct Matrix2D:
         # ensure everything is 8-padded.
         self.rows = w
         self.cols = (h + simd_width_u32 - 1) & ~(simd_width_u32 - 1)
-        self.nums = DTypePointer[DType.int32].aligned_alloc(64, self.rows * self.cols)
-        memset(self.nums, 0, self.rows * self.cols)
+        self.nums = Array[DType.int32](self.rows * self.cols)        
 
     # override copy constructor to also copy memory
     fn __copyinit__(inout self, other: Self):
         self.rows = other.rows
         self.cols = other.cols
-        self.nums = DTypePointer[DType.int32].aligned_alloc(64, self.rows * self.cols)
-        memcpy(self.nums, other.nums, self.rows * self.cols)
-
-    fn __del__(owned self):
-        self.nums.free()
+        self.nums = Array[DType.int32](self.rows * self.cols)
+        memcpy(self.nums.data, other.nums.data, self.rows * self.cols)
 
     # parse and store an input line as a column in the matrix
     fn store_column(inout self, x: Int, s: StringSlice):
-        let p = make_parser[' '](s)
+        p = make_parser[" "](s)
         for i in range(p.length()):
-            self.nums[self.cols * i + x] = atoi(p.get(i)).to_int()
+            self.nums[self.cols * i + x] = int(atoi(p.get(i)))
 
     # computes the differential, from top to bottown, leaving last row intact (used in the final pass)
     fn reduce_down(inout self, rows: Int):
         for ofs in range(self.cols // simd_width_u32):
-            var prev = self.nums.aligned_simd_load[simd_width_u32, 64](ofs * simd_width_u32)
+            var prev = self.nums.load[width=simd_width_u32](ofs * simd_width_u32)
             for i in range(1, rows):
-                let next = self.nums.aligned_simd_load[simd_width_u32, 64](i * self.cols + ofs * simd_width_u32)
+                next = self.nums.load[width=simd_width_u32](i * self.cols + ofs * simd_width_u32)
                 prev = next - prev
-                self.nums.aligned_simd_store[simd_width_u32, 64](((i - 1) * self.cols + ofs * simd_width_u32), prev)
+                self.nums.store[width=simd_width_u32](((i - 1) * self.cols + ofs * simd_width_u32), prev)
                 prev = next
 
     # computes the differential, leaving first row intact (used in the final pass)
     fn reduce_up(inout self, skip: Int):
         for ofs in range(self.cols // simd_width_u32):
-            var prev = self.nums.aligned_simd_load[simd_width_u32, 64](skip * self.cols + ofs * simd_width_u32)
+            var prev = self.nums.load[width=simd_width_u32](skip * self.cols + ofs * simd_width_u32)
             for i in range(skip + 1, self.rows):
-                let next = self.nums.aligned_simd_load[simd_width_u32, 64](i * self.cols + ofs * simd_width_u32)
+                next = self.nums.load[width=simd_width_u32](i * self.cols + ofs * simd_width_u32)
                 prev = next - prev
-                self.nums.aligned_simd_store[simd_width_u32, 64]((i * self.cols + ofs * simd_width_u32), prev)
+                self.nums.store[width=simd_width_u32]((i * self.cols + ofs * simd_width_u32), prev)
                 prev = next
 
     # Returns the sum of all elements in the matrix
@@ -61,32 +58,32 @@ struct Matrix2D:
         for ofs in range(self.cols // simd_width_u32):
             var tmp = SIMD[DType.int32, simd_width_u32](0)
             for i in range(self.rows):
-                tmp += self.nums.aligned_simd_load[simd_width_u32, 64](i * self.cols + ofs * simd_width_u32)
+                tmp += self.nums.load[width=simd_width_u32](i * self.cols + ofs * simd_width_u32)
             tot += tmp
-        return tot.reduce_add().to_int()
+        return int(tot.reduce_add())
 
     # Returns the sum of sequential differences of all the columns in the matrix
     fn dsum(inout self) -> Int64:
         var tot = SIMD[DType.int32, simd_width_u32](0)
         for ofs in range(self.cols // simd_width_u32):
-            var prev = self.nums.aligned_simd_load[simd_width_u32, 64]((self.rows - 1) * self.cols + ofs * simd_width_u32)
+            var prev = self.nums.load[width=simd_width_u32]((self.rows - 1) * self.cols + ofs * simd_width_u32)
             for i in range(self.rows - 2, -1, -1):
-                let next = self.nums.aligned_simd_load[simd_width_u32, 64](i * self.cols + ofs * simd_width_u32)
+                next = self.nums.load[width=simd_width_u32](i * self.cols + ofs * simd_width_u32)
                 prev = next - prev
             tot += prev
-        return tot.reduce_add().to_int()
+        return int(tot.reduce_add())
 
     # for debugging
     fn print(self, y: Int):
         for i in range(self.rows):
-            print_no_newline(self.nums[i * self.cols + y], "")
+            print(self.nums[i * self.cols + y], "", end="")
         print()
 
 
 fn main() raises:
-    let f = open("day09.txt", "r")
-    let lines = make_parser['\n'](f.read())
-    let first = make_parser[' '](lines.get(0))
+    f = open("day09.txt", "r")
+    lines = make_parser["\n"](f.read())
+    first = make_parser[" "](lines.get(0))
     var mat = Matrix2D(first.length(), lines.length())
 
     @parameter

@@ -1,7 +1,7 @@
 from parser import *
 from wrappers import minibench
 from array import Array
-from math.bit import ctpop
+from bit import pop_count
 
 # Popcnt based on https://en.wikipedia.org/wiki/Hamming_weight
 fn popcnt(v: SIMD[DType.int32, 1]) -> Int:
@@ -9,17 +9,17 @@ fn popcnt(v: SIMD[DType.int32, 1]) -> Int:
     alias m2 = 0x3333333333333333
     alias m4 = 0x0F0F0F0F0F0F0F0F
     alias h01 = 0x0101010101010101
-    var x: UInt64 = v.to_int()
+    var x: UInt64 = int(v)
     x -= (x >> 1) & m1
     x = (x & m2) + ((x >> 2) & m2)
     x = (x + (x >> 4)) & m4
-    return ((x * h01) >> 56).to_int()
+    return int((x * h01) >> 56)
 
 
 fn main() raises:
-    let f = open("day13.txt", "r")
-    let lines = make_parser["\n"](f.read(), False)
-    let mats = Array[DType.int32](200 * 20)
+    f = open("day13.txt", "r")
+    lines = make_parser["\n"](f.read(), False)
+    mats = Array[DType.int32](200 * 20)
     var matcnt: Int = 0
 
     @parameter    
@@ -46,7 +46,7 @@ fn main() raises:
             var b = 0
             var tbb : Int32 = 1
             while i > b and i + b < size:
-                let pc = ctpop(mats[ofs + i - b - 1] ^ mats[ofs + i + b]) 
+                pc = pop_count(mats[ofs + i - b - 1] ^ mats[ofs + i + b]) 
                 if pc > tbb:
                     break
                 # apparently compiler is smart enough to not compute this
@@ -60,21 +60,21 @@ fn main() raises:
     fn parse() -> Int64:
         var ofs = 400
         var prev = 0
-        mats.clear()
+        mats.fill(0)
         matcnt = 0
         for l in range(lines.length()):
             # Empty lines trigger parsing the preceding array
             if lines[l].size == 0:
-                let dimY = l - prev
-                let r = mats.data.offset(ofs)
-                let dimX = lines[l - 1].size
-                let c = mats.data.offset(ofs + dimY)
+                dimY = l - prev
+                r = mats.data.offset(ofs)
+                dimX = lines[l - 1].size
+                c = mats.data.offset(ofs + dimY)
                 # Store each cell into bits of r and c
                 # array r is represented row-wise, c is column-wise (transposed r)
                 # all data is stored flat in the mats array. 
                 for i in range(dimY):
                     for j in range(dimX):
-                        let v = lines[prev + i][j].to_int() & 1
+                        v = int(lines[prev + i][j]) & 1
                         r[i] = r[i] * 2 + v
                         c[j] = c[j] * 2 + v
                 prev = l + 1
@@ -91,8 +91,8 @@ fn main() raises:
     fn run[match_fn: fn (Int, Int, /) capturing -> Int64]() -> Int64:
         var sum: Int64 = 0
         for i in range(matcnt):
-            sum += 100 * match_fn(mats[i * 4].to_int(), mats[i * 4 + 1].to_int())
-            sum += match_fn(mats[i * 4 + 2].to_int(), mats[i * 4 + 3].to_int())
+            sum += 100 * match_fn(int(mats[i * 4]), int(mats[i * 4 + 1]))
+            sum += match_fn(int(mats[i * 4 + 2]), int(mats[i * 4 + 3]))
         return sum
 
     @parameter

@@ -1,6 +1,6 @@
 from parser import *
 from wrappers import minibench
-from memory.buffer import Buffer
+from array import Array
 
 # Encode a string label into an integer code 
 @always_inline
@@ -10,18 +10,18 @@ fn encode(s: StringSlice) -> Int:
     for i in range(s.size):
         if i == 2:
             break
-        ret = ret * 26 + (s[i].to_int()) - orda
+        ret = ret * 26 + (int(s[i])) - orda
     return ret
 
 fn main() raises:
-    let f = open("day20.txt", "r")
-    let lines = make_parser["\n"](f.read())
-    let modules = Buffer[64,DType.int64].aligned_stack_allocation[8]()
-    let masks = Buffer[64,DType.int64].aligned_stack_allocation[8]()
-    let counts = Buffer[64,DType.int64].aligned_stack_allocation[8]()
-    let conns = Buffer[64*9,DType.int8].aligned_stack_allocation[64]()
-    let mapping = Buffer[32*32,DType.int8].aligned_stack_allocation[64]()
-    let pulses = Buffer[16000,DType.int8].aligned_stack_allocation[64]()
+    f = open("day20.txt", "r")
+    lines = make_parser["\n"](f.read())
+    modules = Array[DType.int64](64)
+    masks = Array[DType.int64](64)
+    counts = Array[DType.int64](64)
+    conns = Array[DType.int8](9*64)
+    mapping = Array[DType.int8](32*32)
+    pulses = Array[DType.int8](16000)
 
     @parameter
     fn parse() -> Int64:
@@ -30,43 +30,43 @@ fn main() raises:
         mapping.zero()
         var cnt = 1
         for i in range(lines.length()):
-            let line = lines[i]
+            line = lines[i]
             alias cGt = ord('>')
-            let p = line.find(cGt)
+            p = line.find(cGt)
             if p < 0:
                 continue
             alias cb = ord('b')
             alias cOmma = ord(',')
-            let r = make_parser[cOmma](line[p+1:line.size])
+            r = make_parser[cOmma](line[p+1:line.size])
             var c = SIMD[DType.int8, 8](0)
             c[0] = r.length()
             for i in range(r.length()):
-                let code = encode(r[i][1:r[i].size])
-                var d : Int = mapping[code].to_int()
+                code = encode(r[i][1:r[i].size])
+                var d : Int = int(mapping[code])
                 if d == 0: 
                     #print("map",r[i][1:r[i].size],"via",code,"to",cnt)
                     mapping[code] = d = cnt
                     cnt += 1
                 c[i+1] = d
-            let op : Int64
-            let id : Int
+            var op : Int64
+            var id : Int
             if line[0] != cb:
-                let code = encode(line[1:p-2])
+                code = encode(line[1:p-2])
                 if mapping[code] == 0:
                     #print("map",line[1:p-2],"via",code,"to",cnt)
                     mapping[code] = cnt
                     cnt += 1
-                id = mapping[code].to_int()
+                id = int(mapping[code])
                 alias cAnd = ord('&')
-                op = (line[0].to_int() ^ 36) << 60
+                op = (int(line[0]) ^ 36) << 60
             else:
                 id = 0
                 op = 0
-            for i in range(c[0].to_int()):
-                let d = c[i+1].to_int()
+            for i in range(int(c[0])):
+                d = int(c[i+1])
                 conns[d] += 1
                 masks[d] |= 1<<id
-            conns.data.aligned_simd_store[8,8](64 + id * 8, c)
+            conns.data.store[width=8](64 + id * 8, c)
             #print(line[0:p-2],id,c)
             modules[id] = op
         return cnt
@@ -76,21 +76,22 @@ fn main() raises:
         var pi = 0
         var pc = 2
         var pcnt = SIMD[DType.int32, 2](0,0)
-        pulses[0] = pulses[1] = 0
+        pulses[0] = 0
+        pulses[1] = 0
         while pi < pc:
-            let src = pulses[pi].to_int() 
-            let dst = (pulses[pi+1] & 63).to_int()
-            var level = (pulses[pi+1] >> 6).to_int()
+            src = int(pulses[pi]) 
+            dst = int(pulses[pi+1] & 63)
+            var level = int(pulses[pi+1] >> 6)
             var module = modules[dst]
-            let c = conns.data.aligned_simd_load[8,8](64+dst * 8)
-            let op = (module >> 60)
+            c = conns.data.load[width=8](64+dst * 8)
+            op = (module >> 60)
             pcnt[level] += 1
             #print(pi//2,src,dst,level,"|",module&~(op<<60),op,masks[dst])
             pi += 2
             if op == 1: # %
                 if level == 0:
                     module ^= 1
-                    level = module.to_int() & 1
+                    level = int(module) & 1
                 else:
                     # ignore high signals
                     continue
@@ -105,7 +106,7 @@ fn main() raises:
             # update module state
             modules[dst] = module
             # now broadcast from src
-            for i in range(c[0].to_int()):
+            for i in range(int(c[0])):
                 pulses[pc] = dst
                 pulses[pc+1] = c[i+1] + (level << 6)
                 #print(level,">",c[i+1])
@@ -133,11 +134,11 @@ fn main() raises:
         var cnt = 0
         var prod = 1
         var seen : Int64 = 0
-        let fid = mapping[465].to_int() # rx
+        fid = int(mapping[465]) # rx
         var monitor = -1
         for i in range(64):
-            let c = conns.data.aligned_simd_load[8,8](64+i * 8)
-            for j in range(c[0].to_int()):
+            c = conns.data.load[width=8](64+i * 8)
+            for j in range(int(c[0])):
                 if c[j+1] == fid:
                     monitor = i
         while counts[fid] == 0:

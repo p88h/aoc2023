@@ -1,6 +1,6 @@
 from parser import *
 from os.atomic import Atomic
-from collections.vector import DynamicVector
+from collections import List
 from wrappers import run_multiline_task
 
 
@@ -17,36 +17,35 @@ struct MultiMatcher:
 
     # These holds the decomposed representation of inserted patterns: final character,
     # prefix code, and byte mask, respectively. This could have used a struct, but you
-    # can't stuff arbitrary types into a DynamicVector.
+    # can't stuff arbitrary types into a List.
     # You can stuff Tuples, apparently, but tuple handling in Mojo is a bit awkward too.
-    var fcv: DynamicVector[Int8]
-    var pfx: DynamicVector[Int32]
-    var msk: DynamicVector[Int32]
+    var fcv: List[UInt8]
+    var pfx: List[Int32]
+    var msk: List[Int32]
 
     fn __init__(inout self, words: VariadicList[StringLiteral]):
-        # Pre-allocate just enough capacity
-        self.fcv = DynamicVector[Int8](10)
-        self.pfx = DynamicVector[Int32](10)
-        self.msk = DynamicVector[Int32](10)
+        self.fcv = List[UInt8]()
+        self.pfx = List[Int32]()
+        self.msk = List[Int32]()
         for i in range(len(words)):
             self.add(words[i])
 
     fn add(inout self, s: String):
-        let l = len(s)
+        l = len(s)
         # s._buffer[l - 1] == ord(s[i]); but works faster it seems
         # Not sure if accessing _buffer is discouraged? Probably will break one day.
-        self.fcv.push_back(s._buffer[l - 1])
+        self.fcv.append(s._buffer[l - 1])
         var r: Int32 = 0
         var m: Int32 = 0
         # While iterators are supported in Mojo, none of the standard library
         # types implement them, have to use range(), which does work.
         for i in range(l - 1):
-            r = (r << 8) + s._buffer[i].to_int()
+            r = (r << 8) + int(s._buffer[i])
             m = (m << 8) + 0xFF
-        self.pfx.push_back(r)
-        self.msk.push_back(m)
+        self.pfx.append(r)
+        self.msk.append(m)
 
-    fn check(self, cc: Int8, prev: Int32) -> Int:
+    fn check(self, cc: UInt8, prev: Int32) -> Int:
         # check all patterns
         for i in range(10):
             if self.fcv[i] == cc and (prev & self.msk[i]) == self.pfx[i]:
@@ -54,8 +53,8 @@ struct MultiMatcher:
         return -1
 
 fn main() raises:
-    let f = open("day01.txt", "r")
-    let p = make_parser['\n'](f.read())
+    f = open("day01.txt", "r")
+    p = make_parser['\n'](f.read())
     # Since we want the parallel code to work correctly, we store the sums in atomic integers
     var a1 = Atomic[DType.int32](0)
     var a2 = Atomic[DType.int32](0)
@@ -70,18 +69,18 @@ fn main() raises:
     fn digitize1(i: Int):
         var lsum = 0
         for l in range(i*chunk_size, (i+1)*chunk_size):
-            let s = p.get(l)
+            s = p.get(l)
             var d1 = 0
             var d2 = 0
             # Check forward to find first digit
             for i in range(s.size):
-                let c = s[i].to_int()
+                c = int(s[i])
                 if c >= zero and c <= nine:
                     d1 = c - zero
                     break
             # Check backward to find last digit
             for i in range(s.size - 1, -1, -1):
-                let c = s[i].to_int()
+                c = int(s[i])
                 if c >= zero and c <= nine:
                     d2 = c - zero
                     break
@@ -93,8 +92,8 @@ fn main() raises:
     # Fun fact - VariadicList apparently can hold literals, but cannot hold Strings.
     # Variadic since other list variants only make sense in some very specific contexts
     # like when you only use predetermined list sizes and don't iterate over the list.
-    let m = MultiMatcher(VariadicList[StringLiteral]("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"))
-    let r = MultiMatcher(VariadicList[StringLiteral]("orez", "eno", "owt", "eerht", "ruof", "evif", "xis", "neves", "thgie", "enin"))
+    m = MultiMatcher(VariadicList[StringLiteral]("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"))
+    r = MultiMatcher(VariadicList[StringLiteral]("orez", "eno", "owt", "eerht", "ruof", "evif", "xis", "neves", "thgie", "enin"))
 
     # Similar to the part 1, this does the digits checks and also uses the multi-matchers
     # to find words.
@@ -102,13 +101,13 @@ fn main() raises:
     fn digitize2(i: Int):
         var lsum = 0
         for l in range(i*chunk_size, (i+1)*chunk_size):
-            let s = p.get(l)
+            s = p.get(l)
             var d1 = 0
             var d2 = 0
             # last four characters code
             var l4: Int32 = 0
             for i in range(s.size):
-                let c = s[i].to_int()
+                c = int(s[i])
                 var d = -1
                 if c >= zero and c <= nine:
                     d = c - zero
@@ -121,7 +120,7 @@ fn main() raises:
                     break
             l4 = 0
             for i in range(s.size - 1, -1, -1):
-                let c = s[i].to_int()
+                c = int(s[i])
                 var d = -1
                 if c >= zero and c <= nine:
                     d = c - zero
@@ -137,14 +136,15 @@ fn main() raises:
 
     @parameter
     fn results():
-        print(a1.value.to_int())
-        print(a2.value.to_int())
+        print(int(a1.value))
+        print(int(a2.value))
 
     # this wraps executing the step functions, benchmarking them etc.
-    run_multiline_task[digitize1, digitize2, results](p.length() // chunk_size, 24)
+    run_multiline_task[digitize1, digitize2, results](p.length() // chunk_size)
 
     # While this looks like debug info, Mojo actually sometimes forgets I need the parser in all these step
     # tasks, and happily crashes rather than keeping it around. This holds it in place until that happens.
     print(p.length(), "rows")
     print(m.pfx.size, "prefixes")
     print(r.pfx.size, "rprefixes")
+    print(a1.value,a2.value)

@@ -12,3 +12,10 @@ nanobench.h
 /day19.cc
 /day19
 /day16
+
+# pixi environments
+.pixi
+*.egg-info
+# magic environments
+.magic
+magic.lock

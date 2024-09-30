@@ -19,39 +19,39 @@ fn ssqrt(x: Int64) -> Int64:
 # Computes the integral distance between solutions of a quadratic function (x)(t-x)-d
 # / number of values of x such for which the function is strictly larger than zero
 fn quadratic(t: Int64, d: Int64) -> Int64:
-    let delta: Int64 = t * t - 4 * d
+    delta = t * t - 4 * d
     if delta <= 0:
         return 0
-    let ds = ssqrt(delta)
+    ds = ssqrt(delta)
     var x0 = (t - ds) / 2
     var x1 = (t + ds) / 2
     if x0 * (t - x0) <= d:
         x0 += 1
     if x1 * (t - x1) <= d:
         x1 -= 1
-    return ((x1 - x0) + 1).to_int()
+    return int((x1 - x0) + 1)
 
 
 fn main() raises:
-    let f = open("day06.txt", "r")
-    let lines = make_parser['\n'](f.read())
+    f = open("day06.txt", "r")
+    lines = make_parser['\n'](f.read())
 
     @parameter
     fn part1() -> Int64:
-        let times = make_parser[' '](lines.get(0))
-        let dist = make_parser[' '](lines.get(1))
+        times = make_parser[' '](lines.get(0))
+        dist = make_parser[' '](lines.get(1))
         var s: Int64 = 1
         for i in range(1,times.length()):
-            let t = atoi(times.get(i))
-            let d = atoi(dist.get(i))
-            let q = quadratic(t, d)
+            t = atoi(times.get(i))
+            d = atoi(dist.get(i))
+            q = quadratic(t, d)
             s *= q
         return s
 
     @parameter
     fn part2() -> Int64:
-        let t: Int64 = atoi(lines.get(0)[10:])
-        let d: Int64 = atoi(lines.get(1)[10:])
+        t = atoi(lines.get(0)[10:])
+        d = atoi(lines.get(1)[10:])
         return quadratic(t, d)
 
     minibench[part1]("part1")

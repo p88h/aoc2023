@@ -2,55 +2,53 @@ from parser import *
 from wrappers import minibench
 from algorithm import parallelize
 from memory import memset
+from array import Array
 
 # Encode a 3-letter identifier to 15-bit integer
 @always_inline
 fn encode(s: StringSlice) -> Int:
-    return ((s[0].to_int() - 64) << 10) + 
-           ((s[1].to_int() - 64) << 5) + 
-           (s[2].to_int() - 64)
+    return ((int(s[0]) - 64) << 10) + 
+           ((int(s[1]) - 64) << 5) + 
+           (int(s[2]) - 64)
 
 @always_inline
 fn gcd(a1: Int64,b1: Int64) -> Int64:
     var a = a1
     var b = b1
     while b != 0:
-        let c = a % b
+        c = a % b
         a = b
         b = c         
     return a
 
 @always_inline
 fn lcm(a: Int64,b: Int64) -> Int64:
-    let g = gcd(a,b)
+    g = gcd(a,b)
     return (a // g) * b
 
 struct Game:
-    var lr: DTypePointer[DType.int32]
-    var sp: DynamicVector[Int]
+    var lr: Array[DType.int32]
+    var sp: List[Int]
     var cnt: Int
 
     fn __init__(inout self):
-        self.lr = DTypePointer[DType.int32].alloc(32768)
-        self.sp = DynamicVector[Int]()
+        self.lr = Array[DType.int32](32768)
+        self.sp = List[Int]()
         self.cnt = 0
-    
-    fn __del__(owned self):
-        self.lr.free()
-    
+        
     fn clear(inout self):
-        memset(self.lr,0, 32768)
+        self.lr.zero()
         self.sp.clear()
         self.cnt = 0
 
     fn add(inout self, s: StringSlice):
-        let n = encode(s[0:3])
-        let l = encode(s[7:10])
-        let r = encode(s[12:15])
+        n = encode(s[0:3])
+        l = encode(s[7:10])
+        r = encode(s[12:15])
         # start node goes into the vector
         alias cA = ord('A')
         if s[2] == cA:  # 'A'
-            self.sp.push_back(n)
+            self.sp.append(n)
         self.lr[n] = (l << 15) + r
         # final node gets a bit
         alias cZ = ord('Z')
@@ -59,18 +57,18 @@ struct Game:
         # print(s,n,l,r,self.lr[n])
         self.cnt += 1
     
-    fn next(self, id: Int, c: Int8) -> Int:
+    fn next(self, id: Int, c: UInt8) -> Int:
         if c == 76: # 'L'
-            return ((self.lr[id] >> 15) & 0x7FFF).to_int()
+            return int((self.lr[id] >> 15) & 0x7FFF)
         else:
-            return ((self.lr[id]) & 0x7FFF).to_int()
+            return int((self.lr[id]) & 0x7FFF)
 
 fn main() raises:
-    let f = open("day08.txt", "r")
-    let lines = make_parser['\n'](f.read())
-    let ins = lines.get(0)
+    f = open("day08.txt", "r")
+    lines = make_parser['\n'](f.read())
+    ins = lines.get(0)
     var game = Game()
-    var results = DynamicVector[Int](10)
+    var results = List[Int]()
 
     @parameter
     fn parse() -> Int64:
@@ -78,15 +76,15 @@ fn main() raises:
         results.clear()
         for i in range(1,lines.length()):
             game.add(lines.get(i))
-        for i in range(game.sp.size):
-            results.push_back(0)
+        for _ in range(game.sp.size):
+            results.append(0)
         return game.cnt
 
     @parameter
     fn part1() -> Int64:
         var s = 0        
         var id = (1 << 10) + (1 << 5) + 1 # 'AAA'
-        let fin = (26 << 10) + (26 << 5) + 26 # 'ZZZ'
+        fin = (26 << 10) + (26 << 5) + 26 # 'ZZZ'
         while id != fin and id != 0:
             id = game.next(id, ins[s % ins.size])
             s += 1            

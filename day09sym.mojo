@@ -1,38 +1,36 @@
 from parser import *
 from wrappers import minibench
-from memory import memset
-
-alias simd_width_u32 = simdwidthof[DType.int32]()
+from array import Array
 
 
 struct SymSolver:
-    # A vector of up to 32 symbolic vectors, representing up to 32 variables. 
+    # A vector of up to 32 symbolic vectors, representing up to 32 variables.
     # We need the number to be a power of two to make the SIMD code simpler.
-    var syms: DTypePointer[DType.int32]
+    var syms: Array[DType.int32]
     var size: Int
 
     # initialize and set the values to an 'identity matrix' of sorts.
     fn __init__(inout self, count: Int):
-        self.syms = DTypePointer[DType.int32].aligned_alloc(32, count * 32)
+        self.syms = Array[DType.int32](256 * 32)
         self.size = count
         for i in range(count):
             var s = SIMD[DType.int32, 32](0)
             s[i] = 1
-            self.syms.aligned_simd_store[32, 32](i * 32, s)
+            self.syms.store[width=32](i * 32, s)
 
     # Computes the grid and returns the flat multiplier array (and it's mirror image)
-    fn compute(inout self) -> Tuple[SIMD[DType.int32, 32], SIMD[DType.int32, 32]]:        
+    fn compute(inout self) -> Tuple[SIMD[DType.int32, 32], SIMD[DType.int32, 32]]:
         var f = SIMD[DType.int32, 32](0)
         # This is exactly the same as the specified problem, but working on 'symbolic' numbers
         # The math is the same, though, just instead of adding individual values, we do 32 at a time
         for k in range(self.size):
             # previous item
-            var p = self.syms.aligned_simd_load[32, 32](0)
+            var p = self.syms.load[width=32](0)
             for i in range(self.size - k - 1):
                 # next item
-                let n = self.syms.aligned_simd_load[32, 32](i * 32 + 32)
+                n = self.syms.load[width=32](i * 32 + 32)
                 # compute diff and store back
-                self.syms.aligned_simd_store[32, 32](i * 32, n - p)
+                self.syms.store[width=32](i * 32, n - p)
                 p = n
             # add the last element to our formula
             f += p
@@ -48,30 +46,28 @@ struct VecMatrix:
     """
     Represents the input matrix, with each line stored in a single SIMD vector.
     Can handle up to 32 elements per line.
-    """    
-    var nums: DTypePointer[DType.int32]
+    """
+
+    var nums: Array[DType.int32]
     var cols: Int
     var rows: Int
 
-    # initializer. No need to clear, fma will ignore unused cells. 
-    fn __init__(inout self, rows: Int, cols: Int):        
+    # initializer. No need to clear, fma will ignore unused cells.
+    fn __init__(inout self, rows: Int, cols: Int):
         self.cols = cols
         self.rows = 0
         # ensure everything is padded to 32.
-        self.nums = DTypePointer[DType.int32].aligned_alloc(32, 32 * rows)
-
-    fn __del__(owned self):
-        self.nums.free()
+        self.nums = Array[DType.int32](256 * 32)
 
     fn clear(inout self):
         self.rows = 0
 
     # parse and store an input line as a column in the matrix
     fn add_row(inout self, s: StringSlice):
-        let p = make_parser[' '](s)
+        p = make_parser[" "](s)
         # When storing data, we just pad everything to 32, no SIMD here
         for i in range(p.length()):
-            self.nums[self.rows * 32 + i] = atoi(p.get(i)).to_int()
+            self.nums[self.rows * 32 + i] = int(atoi(p.get(i)))
         self.rows += 1
 
     # multiply each vector by the mult parameter and retun sum of results
@@ -83,14 +79,14 @@ struct VecMatrix:
             # Mojo doesn't even do AVX512, so this breaks down to 4x8-wide ops with AVX2.
             # Or equivalent. Manually doing 3x8 is a tiny bit faster but too
             # complicated)
-            acc = self.nums.aligned_simd_load[32, 32](i * 32).fma(mult, acc)
-        return acc.reduce_add().to_int()
+            acc = self.nums.load[width=32](i * 32).fma(mult, acc)
+        return int(acc.reduce_add())
 
 
 fn main() raises:
-    let f = open("day09.txt", "r")
-    let lines = make_parser['\n'](f.read())
-    let first = make_parser[' '](lines.get(0))
+    f = open("day09.txt", "r")
+    lines = make_parser["\n"](f.read())
+    first = make_parser[" "](lines.get(0))
     var mat = VecMatrix(lines.length(), first.length())
     var flat = SIMD[DType.int32, 32](0)
     var talf = SIMD[DType.int32, 32](0)

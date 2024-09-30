@@ -1,50 +1,49 @@
 from parser import *
 from wrappers import minibench
 from array import Array
-from memory.buffer import Buffer
+from array import Array
 from quicksort import qsort
-from math import min, max
 
 
 fn main() raises:
-    let f = open("day22.txt", "r")
-    let lines = make_parser["\n"](f.read())
-    let lcnt = lines.length()
+    f = open("day22.txt", "r")
+    lines = make_parser["\n"](f.read())
+    lcnt = lines.length()
     # lots of arrays
-    let bricks = Array[DType.int16](lcnt * 8)
-    let deps = Array[DType.int16](lcnt * 8)
-    let hmap = Array[DType.int16](100)
-    let bmap = Array[DType.int16](100)
-    let supp = Array[DType.int16](lcnt)
-    let work = Array[DType.int16](lcnt)
-    let safe = Array[DType.int16](lcnt, 1)
+    bricks = Array[DType.int16](lcnt * 8)
+    deps = Array[DType.int16](lcnt * 8)
+    hmap = Array[DType.int16](100)
+    bmap = Array[DType.int16](100)
+    supp = Array[DType.int16](lcnt)
+    work = Array[DType.int16](lcnt)
+    safe = Array[DType.int16](lcnt, 1)
 
     @parameter
     fn parse() -> Int64:
         for i in range(lcnt):
-            let line = lines[i]
+            line = lines[i]
             var vec = atomi[8, DType.int16, False, False](line).rotate_right[1]()
-            let v1 = vec.slice[4](0).rotate_right[1]()
-            let v2 = vec.slice[4](4).rotate_right[2]()
+            v1 = vec.slice[4, offset=0]().rotate_right[1]()
+            v2 = vec.slice[4, offset=4]().rotate_right[2]()
             if v2[0] < v1[0]:
                 vec = v2.join(v1)
             else:
                 vec = v1.join(v2)
-            bricks.aligned_simd_store(i * 8, vec)
+            bricks.store[width=8](i * 8, vec)
         qsort[8, DType.int16, 1](bricks)
         return lcnt
     
     @parameter
     fn reset():
-        hmap.clear()
-        bmap.clear()
+        hmap.zero()
+        bmap.zero()
         safe.fill(1)
         for k in range(lcnt):
             deps[k*8] = 0
 
     @parameter
     fn drop(idx: Int):
-        var vec = bricks.aligned_simd_load[8](idx * 8)
+        var vec = bricks.load[width=8](idx * 8)
         var rng = SIMD[DType.int16, 16](0)
         var rl = 0
         if vec[2] != vec[6]:
@@ -59,29 +58,29 @@ fn main() raises:
         if vec[0] > 1:
             var mh: Int16 = 0
             for i in range(rl):
-                mh = max(mh, hmap[rng[i].to_int()])
+                mh = max(mh, hmap[int(rng[i])])
             if mh < vec[0] - 1:
                 alias sub = SIMD[DType.int16, 8](1, 0, 0, 0, 1, 0, 0, 0)
                 vec -= sub * (vec[0] - 1 - mh)
         var sup = SIMD[DType.int16, 8](0)
         var prev : Int16 = -1
         for i in range(rl):
-            let ri = rng[i].to_int()
+            ri = int(rng[i])
             if vec[0] > 1 and hmap[ri] == vec[0] - 1:
-                let base = bmap[ri]
+                base = bmap[ri]
                 if base != prev:
                     sup[0] += 1
-                    sup[sup[0].to_int()] = base
+                    sup[int(sup[0])] = base
                 prev = base
             hmap[ri] = vec[4]
             bmap[ri] = idx
         supp[idx] = sup[0]
         for j in range(sup[0]):
-            let k = sup[j+1].to_int()
+            k = int(sup[j+1])
             deps[k * 8] += 1
-            deps[k * 8 + deps[k * 8].to_int()] = idx
+            deps[k * 8 + int(deps[k * 8])] = idx
         if sup[0] == 1:
-            safe[sup[1].to_int()] = 0
+            safe[int(sup[1])] = 0
 
     @parameter
     fn explode(start: Int) -> Int:
@@ -91,10 +90,10 @@ fn main() raises:
         var pos = 0
         var lim = 1
         while pos < lim:
-            let cur = work[pos].to_int()
+            cur = int(work[pos])
             pos += 1
             for di in range(deps[cur * 8]):
-                let dst = deps[cur * 8 + di + 1].to_int()
+                dst = int(deps[cur * 8 + di + 1])
                 sup2[dst] -= 1
                 if sup2[dst] == 0:
                     work[lim] = dst
@@ -108,7 +107,7 @@ fn main() raises:
         for i in range(lcnt):
             drop(i)
         for i in range(lcnt):
-            sum += safe[i].to_int()
+            sum += int(safe[i])
         return sum
         
     @parameter
@@ -116,15 +115,15 @@ fn main() raises:
         var cache = Array[DType.int32](lcnt, - 1)
         var esum = 0
         for start in range(lcnt):
-            let ecnt : Int
+            var ecnt : Int
             if safe[start] == 1:
                 continue
             if cache[start] >= 0:
-                ecnt = cache[start].to_int()
+                ecnt = int(cache[start])
             else:
                 ecnt = explode(start)
             if deps[start * 8] == 1:
-                cache[deps[start * 8 + 1].to_int()] = ecnt -1
+                cache[int(deps[start * 8 + 1])] = ecnt -1
             esum += ecnt
         return esum
 
@@ -132,7 +131,7 @@ fn main() raises:
     minibench[part1]("part1")
     minibench[part2]("part2")
 
-    print(lines.length(), "bricks")
+    print(lines.length(), "bricks", lcnt)
     print(bricks.bytecount(), "bricks mem")
     print(hmap.bytecount()+bmap.bytecount()+safe.bytecount(),"drop mem")
     print(deps.bytecount()+supp.bytecount()+work.bytecount(),"deps mem")

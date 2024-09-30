@@ -1,36 +1,37 @@
 from parser import *
 from wrappers import run_multiline_task
 from array import Array
-from memory import memcpy
+from memory import memcpy, memset
+from os.atomic import Atomic
 
 struct Solver:
     var cache : Array[DType.int64]
     var csize : Int
-    var buf : DTypePointer[DType.int8]
+    var buf : Array[DType.uint8]
     var syms : StringSlice
-    var rules : DynamicVector[Int]
+    var rules : List[Int]
 
     fn __init__(inout self, line: StringSlice, mult: Int = 1):
         alias cAsk = ord('?')
-        let p = make_parser[' '](line)
-        let r = make_parser[','](p[1])
-        let l = p[0].size * mult + mult - 1
+        p = make_parser[' '](line)
+        r = make_parser[','](p[1])
+        l = p[0].size * mult + mult - 1
         self.csize = (l+2) * 32
         self.cache = Array[DType.int64](self.csize, -1)
-        self.buf = DTypePointer[DType.int8].alloc(l)
-        self.syms = StringSlice(self.buf, l)
-        self.rules = DynamicVector[Int](r.length() * mult)
+        self.buf = Array[DType.uint8](l)
+        self.syms = StringSlice(self.buf.data, l)
+        self.rules = List[Int](capacity = r.length() * mult)
         for i in range(r.length()):
-            self.rules.push_back(atoi(r[i]).to_int())
-        memcpy(self.buf, line.ptr, p[0].size)
+            self.rules.append(int(atoi(r[i])))
+        memcpy(self.buf.data, line.ptr, p[0].size)
         # replicate
         for i in range (1, mult):
-            let ofs = (p[0].size + 1) * i
+            ofs = (p[0].size + 1) * i
             self.buf.store(ofs - 1, cAsk)
-            memcpy(self.buf.offset(ofs), line.ptr, p[0].size)
+            memcpy(self.buf.data.offset(ofs), line.ptr, p[0].size)
             for j in range(r.length()):
-                self.rules.push_back(self.rules[j])
-        
+                self.rules.append(self.rules[j])
+
     fn count(inout self, sp: Int, rp: Int) -> Int64:
         var sp1 = sp
         # skip empty
@@ -39,7 +40,7 @@ struct Solver:
         alias cAsk = ord('?')
         while sp1 < self.syms.size and self.syms[sp1] == cDot:
             sp1 += 1
-        let ck = sp1*32+rp
+        ck = sp1*32+rp
         if self.cache[ck] >= 0:
             return self.cache[ck]
         var ret : Int64 = 0
@@ -83,8 +84,8 @@ struct Solver:
             
 
 fn main() raises:
-    let f = open("day12.txt", "r")
-    let lines = make_parser['\n'](f.read())
+    f = open("day12.txt", "r")
+    lines = make_parser['\n'](f.read())
     var sum1 = Atomic[DType.int64](0)
     var sum2 = Atomic[DType.int64](0)
 
@@ -108,9 +109,9 @@ fn main() raises:
 
     @parameter
     fn results():
-        print(sum1.value.to_int())
-        print(sum2.value.to_int())
+        print(int(sum1.value))
+        print(int(sum2.value))
 
-    run_multiline_task[step1, step2, results](lines.length() // chunk_size, 24)
+    run_multiline_task[step1, step2, results](lines.length() // chunk_size)
 
-    print(lines.length(), "lines")
+    print(lines.length(), "lines", sum1.value, sum2.value)

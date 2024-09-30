@@ -1,21 +1,18 @@
 # https://github.com/modularml/mojo/issues/1368
-
+# fixed
 
 from memory import memset
-from memory.buffer import Buffer
-alias intptr = DTypePointer[DType.int32]
+from array import Array
+from memory.unsafe_pointer import UnsafePointer
 
+alias intptr = UnsafePointer[Int32]
 
 fn main():
-    # Prints junk, not 0
-    let buf = intptr.alloc(1000)
-    memset(buf, 1, 1000)
-    print(buf.load(0),buf.load(999))
-    let buf2 = intptr.aligned_alloc(16,1024)
-    memset(buf2, 1, 1000)
-    print(buf.aligned_simd_load[16,16](0),buf.aligned_simd_load[16,16](1008))
+    # Prints junk, not 1
+    buf = intptr.alloc(1000)
+    memset(buf, -1, 1000)
+    print(buf[0], buf[999])
     # This works
-    let buff = Buffer[1024,DType.int32].aligned_stack_allocation[16]()
+    buff = Array[DType.int32](1024)
     buff.fill(1)
-    print(buff[0],buff[1023])
-    print(buff.aligned_simd_load[16,16](0),buff.aligned_simd_load[16,16](1008))
+    print(buff[0],buff[1023])    

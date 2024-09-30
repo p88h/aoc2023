@@ -1,14 +1,16 @@
 from parser import *
 from wrappers import minibench
 from array import Array
-from collections.vector import DynamicVector
+from collections import List
+from utils.loop import unroll
 
 
 fn main() raises:
-    let f = open("day14.txt", "r")
-    let lines = make_parser["\n"](f.read(), False)
-    let dim = lines.length()
-    var pebv = DynamicVector[Tuple[Int, Int]](1000)
+    f = open("day14.txt", "r")
+    lines = make_parser["\n"](f.read(), False)
+    dim = lines.length()
+    alias IntPair = SIMD[DType.int32, 2]
+    var pebv = List[IntPair](capacity = 1000)
     # work buffers
     var rocks = Array[DType.int32](128 * 128 * 4)
     var pebtmp = Array[DType.int32](128 * 128)
@@ -20,57 +22,59 @@ fn main() raises:
     # or just by X. In fist case this will create groups, each with new different
     # and those groups will still be internally sorted by Y, or it will be sorted
     # by new Y, which still allows them to be trivially grouped by X.
+    @always_inline
     fn rot90(inout ppos: Array[DType.int32], m: Int):
         for i in range(ppos.size // 2):
-            let y = ppos[2 * i]
-            let x = ppos[2 * i + 1]
+            y = ppos[2 * i]
+            x = ppos[2 * i + 1]
             ppos[2 * i] = x
             ppos[2 * i + 1] = m - y - 1
 
     # group points by X. as long as the points were somewhat / partially sorted by Y,
     # (see above) groups will be sorted by Y
+    @always_inline
     fn groupbyx(ppos: Array[DType.int32], inout work: Array[DType.int32], ofs: Int, m: Int):
         for x in range(m):
             work[ofs + 128 * x] = 0
         for i in range(ppos.size // 2):
-            let y = ppos[2 * i]
-            let x = ppos[2 * i + 1].to_int()
-            let o = work[ofs + 128 * x].to_int() + 1
+            y = ppos[2 * i]
+            x = int(ppos[2 * i + 1])
+            o = int(work[ofs + 128 * x]) + 1
             work[ofs + 128 * x + o] = y
             work[ofs + 128 * x] = o
 
     @parameter
     fn reset():
         for i in range(pebv.size):
-            pebbles[2 * i] = pebv[i].get[0, Int]()
-            pebbles[2 * i + 1] = pebv[i].get[1, Int]()
+            pebbles[2 * i] = pebv[i][0]
+            pebbles[2 * i + 1] = pebv[i][1]
 
     @parameter
     fn parse() -> Int64:
-        var rockv = DynamicVector[Tuple[Int, Int]](1000)
+        var rockv = List[IntPair](capacity = 1000)
         pebv.clear()
         # parse the map and store objects
         for y in range(dim):
             for x in range(dim):
                 alias cO = ord("O")
                 if lines[y][x] == cO:
-                    pebv.push_back((y, x))
+                    pebv.append(IntPair(y, x))
                 alias cHash = ord("#")
                 if lines[y][x] == cHash:
-                    rockv.push_back((y, x))
+                    rockv.append(IntPair(y, x))
         pebbles = Array[DType.int32](pebv.size * 2)
         var tmp = Array[DType.int32](rockv.size * 2)
         for i in range(rockv.size):
-            tmp[2 * i] = rockv[i].get[0, Int]()
-            tmp[2 * i + 1] = rockv[i].get[1, Int]()
+            tmp[2 * i] = rockv[i][0]
+            tmp[2 * i + 1] = rockv[i][1]
         # keep rocks pre-grouped by x; and pre-rotated in 4 directions
         for i in range(4):
-            let ofs = 128 * 128 * i
+            ofs = 128 * 128 * i
             groupbyx(tmp, rocks, ofs, dim)
             var j = 0
             # flatten tmp
             for x in range(dim):
-                for o in range(rocks[ofs + 128 * x].to_int()):
+                for o in range(int(rocks[ofs + 128 * x])):
                     tmp[2 * j] = rocks[ofs + 128 * x + o + 1]
                     tmp[2 * j + 1] = x
                     j += 1
@@ -78,7 +82,7 @@ fn main() raises:
         return pebbles.size // 2
 
     @parameter
-    fn tilt(rpos: Int):
+    fn tilt[rpos: Int]():
         # Distribute pebbles along the x axis.
         groupbyx(pebbles, pebtmp, 0, dim)
         var np = 0
@@ -89,24 +93,24 @@ fn main() raises:
             var wp = 0
             var rp = 0
             # if there are any rocks AND pebbles remaining:
-            let wcnt = pebtmp[128 * x].to_int()
-            let rcnt = rocks[rpos + 128 * x].to_int()
+            wcnt = int(pebtmp[128 * x])
+            rcnt = int(rocks[rpos + 128 * x])
             while rp < rcnt:
                 # next rock and pebble y
-                let rocky = rocks[rpos + 128 * x + rp + 1]
+                rocky = rocks[rpos + 128 * x + rp + 1]
                 while wp < wcnt and pebtmp[128 * x + wp + 1] < rocky:
                     # rock is lower than the pebble. consume the rock.
                     # set ofs (next viable pebble position) to rocky + 1
-                    pebbles.aligned_simd_store(np, pos)
+                    pebbles.store(np, pos)
                     np += 2
                     pos += one
                     wp += 1
                 # consume the pebble, shift it to ofs and update ofs
-                pos[0] = rocky.to_int() + 1
+                pos[0] = int(rocky) + 1
                 rp += 1
             # consume remaining pebbles:
-            while wp < pebtmp[128 * x].to_int():
-                pebbles.aligned_simd_store(np, pos)
+            while wp < int(pebtmp[128 * x]):
+                pebbles.store(np, pos)
                 np += 2
                 pos += one
                 wp += 1
@@ -114,13 +118,13 @@ fn main() raises:
     fn load(ppos: Array[DType.int32], m: Int) -> Int:
         var sum = 0
         for i in range(ppos.size // 2):
-            sum += m - ppos[2 * i].to_int()
+            sum += m - int(ppos[2 * i])
         return sum
 
     @parameter
     fn part1() -> Int64:
         reset()
-        tilt(0)
+        tilt[0]()
         return load(pebbles, dim)
 
     # 32-bit FNV1a hash of the positions.
@@ -128,26 +132,28 @@ fn main() raises:
     fn fnv1a(ppos: Array[DType.int32]) -> Int:
         var hash = SIMD[DType.int32, 8](2166136261)
         for i in range(0, ppos.size, 8):
-            let vals = ppos.aligned_simd_load[8](i)
+            vals = ppos.load[8](i)
             hash = (hash ^ vals) * 16777619
-        return hash.reduce_mul[1]().to_int()
+        return int(hash.reduce_mul[1]())
 
     @parameter
     fn part2() -> Int64:
         reset()
-        hashtab.clear()
-        var vals = DynamicVector[Int](100)
+        hashtab.zero()
+        var vals = List[Int](capacity = 100)
         var hash = fnv1a(pebbles) % modulus
         while hashtab[hash] == 0:
             hashtab[hash] = vals.size
-            vals.push_back(load(pebbles, dim))
-            for i in range(4):
-                tilt(i * 128 * 128)
+            vals.append(load(pebbles, dim))
+            @parameter
+            fn iter[i: Int]():
+                tilt[i * 128 * 128]()
                 rot90(pebbles, dim)
+            unroll[iter, range(4)]()
             hash = fnv1a(pebbles) % modulus
-        let cycle_length = vals.size - hashtab[hash].to_int()
-        let remaining = (1000000000 - vals.size) % cycle_length
-        return vals[hashtab[hash].to_int() + remaining]
+        cycle_length = vals.size - int(hashtab[hash])
+        remaining = (1000000000 - vals.size) % cycle_length
+        return vals[int(hashtab[hash]) + remaining]
 
     minibench[parse]("parse")
     minibench[part1]("part1")

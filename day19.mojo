@@ -1,7 +1,6 @@
 from parser import *
 from wrappers import minibench
 from array import Array
-from math import abs
 
 alias int16x4 = SIMD[DType.int16,4]
 
@@ -18,7 +17,7 @@ fn encode(s: StringSlice) -> Int:
     alias orda = ord('a') - 1
     var ret = 0
     for i in range(s.size):
-        ret = ret * 32 + (s[i].to_int()|32) - orda
+        ret = ret * 32 + (int(s[i])|32) - orda
     return ret
 
 # Evaluate rules, starting from code and processing ranges between elements of ho and hoho
@@ -26,12 +25,12 @@ fn eval(rules: Array[DType.int16], code: Int16, ho: int16x4, hoho: int16x4) -> I
     # special handling for terminal states
     if code == 18: return 0
     if code == 1:
-        return (hoho - ho + int16x4(1,1,1,1)).cast[DType.int64]().reduce_mul[1]().to_int()
+        return int((hoho - ho + int16x4(1,1,1,1)).cast[DType.int64]().reduce_mul[1]())
     # unpack the actual rule
-    let op = rules.data.simd_load[4](code.to_int() * 4)
-    let o = op[0] >> 8
-    let i = (op[0] & 0xFF).to_int()
-    let n = op[1]
+    op = rules.data.load[width=4](int(code) * 4)
+    o = op[0] >> 8
+    i = int(op[0] & 0xFF)
+    n = op[1]
     # process the rule
     if (o == 3): # '>'
         #print(code,i,">",n,"(",ho[i],"-",hoho[i],")",op[2],op[3])
@@ -57,10 +56,10 @@ fn eval(rules: Array[DType.int16], code: Int16, ho: int16x4, hoho: int16x4) -> I
         return eval(rules, op[2], ho, hoho)
 
 fn main() raises:
-    let f = open("day19.txt", "r")
-    let lines = make_parser["\n"](f.read())
-    let rules = Array[DType.int16](131072)
-    let insn = Array[DType.int16](1000)
+    f = open("day19.txt", "r")
+    lines = make_parser["\n"](f.read())
+    rules = Array[DType.int16](131072)
+    insn = Array[DType.int16](1000)
     var icnt = 0
     var dcnt = -1
 
@@ -69,28 +68,28 @@ fn main() raises:
         icnt = 0
         var ridx = 30000 # above 27*32*32
         for k in range(lines.length()):
-            let line = lines[k]
+            line = lines[k]
             alias cBracket = ord('{}')
-            let pos = line.find(cBracket)
+            pos = line.find(cBracket)
             if pos > 0:
                 # sv{m>492:gsq,x>1070:R,a>2386:A,mk}
-                let tok = line[:pos]
+                tok = line[:pos]
                 var c = encode(tok)
                 # print(line,tok,c)
-                let rrr = make_parser[ord(',')](line[pos+1:line.size-1])
+                rrr = make_parser[ord(',')](line[pos+1:line.size-1])
                 for i in range(rrr.length()):
                     alias cOlon = ord(':')
-                    let r = rrr[i]
-                    let pos2 = r.find(cOlon)
-                    let op : int16x4
+                    r = rrr[i]
+                    pos2 = r.find(cOlon)
+                    var op : int16x4
                     # Parse a rule 
                     if pos2 > 0:
                         # m>492:gsq
-                        let v = r[0]
-                        let o = r[1] ^ 61
-                        let n = atoi(r[2:pos2])
-                        let b = encode(r[pos2+1:r.size])
-                        let j : Int
+                        v = r[0]
+                        o = r[1] ^ 61
+                        n = atoi(r[2:pos2])
+                        b = encode(r[pos2+1:r.size])
+                        var j : Int
                         # xmas -> 0123
                         if v == 120:
                             j = 0
@@ -103,23 +102,23 @@ fn main() raises:
                         # o, i < 8 bit each
                         # n 16 bit / 32 total
                         # b 16 bit / c 16 bit / 64 total
-                        op = int16x4((o.to_int() << 8) + j,n.to_int(),b,ridx)
+                        op = int16x4((int(o) << 8) + j,int(n),b,ridx)
                     else:
-                        let b = encode(r)
+                        b = encode(r)
                         op = int16x4(0,0,b,ridx)
-                    rules.data.simd_store[4](c * 4, op)
+                    rules.data.store[width=4](c * 4, op)
                     # print(tok,rrr[i],c,op)
                     c = ridx
                     ridx += 1
             elif pos == 0:
                 # {x=23,m=2544,a=699,s=22}
                 # parse an input
-                let rrr = make_parser[ord(',')](line[1:line.size-1])
+                rrr = make_parser[ord(',')](line[1:line.size-1])
                 var vvv = int16x4(0)
                 for i in range(4):
-                    vvv[i] = atoi(rrr[i][2:]).to_int()
+                    vvv[i] = int(atoi(rrr[i][2:]))
                 # print(line, vvv)
-                insn.data.simd_store[4](icnt * 4, vvv)
+                insn.data.store[width=4](icnt * 4, vvv)
                 icnt += 1
         return icnt
     
@@ -129,8 +128,8 @@ fn main() raises:
     fn part1() -> Int64:
         var ret : Int64 = 0
         for i in range(icnt):
-            let v = insn.data.simd_load[4](i * 4)
-            ret += v.cast[DType.int64]().reduce_add().to_int() * eval(rules, 302, v, v)
+            v = insn.data.load[width=4](i * 4)
+            ret += int(v.cast[DType.int64]().reduce_add()) * eval(rules, 302, v, v)
         return ret
 
     @parameter

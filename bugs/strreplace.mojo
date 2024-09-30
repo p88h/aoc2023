@@ -1,5 +1,5 @@
 # https://github.com/modularml/mojo/issues/1367
-
+# fixed
 
 fn main():
     var s = String("a   complex  test case  with some  spaces")

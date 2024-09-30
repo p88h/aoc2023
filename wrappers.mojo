@@ -3,7 +3,7 @@ import time
 import benchmark
 
 fn minibench[fun: fn () capturing -> Int64](label: StringLiteral, loops: Int = 100):
-    let units = VariadicList[StringLiteral]("ns", "μs", "ms", "s")
+    units = VariadicList[StringLiteral]("ns", "μs", "ms", "s")
     var start = time.now()
     var end = start
     var sloop = loops // 10
@@ -16,7 +16,7 @@ fn minibench[fun: fn () capturing -> Int64](label: StringLiteral, loops: Int = 1
             t += fun()
         end = time.now()
     
-    let avg = (end - start) / sloop
+    avg = (end - start) / sloop
     var div = 1
     var pos = 0
 
@@ -24,7 +24,7 @@ fn minibench[fun: fn () capturing -> Int64](label: StringLiteral, loops: Int = 1
         div *= 1000
         pos += 1
     
-    let unit = units[pos]
+    unit = units[pos]
     print(fun())
     print(label, ":", avg / div, unit, "(", sloop, "loops ) avg", t // sloop,"mod",t % sloop)
 

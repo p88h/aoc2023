@@ -7,23 +7,23 @@ struct Solution:
         self.parse = make_parser[10](s)
 
     fn part1(self) raises -> String:
-        let l = self.parse.get(0)
-        var x: Int = atoi(l).to_int()
+        l = self.parse.get(0)
+        var x: Int = int(atoi(l))
         x *= 2
-        return String(x)
+        return str(x)
 
     fn part2(self) raises -> String:
         var s: Int = 0
         for i in range(self.parse.length()):
-            let l = self.parse.get(i)
-            let y = atoi(l).to_int()
+            l = self.parse.get(i)
+            y = int(atoi(l))
             s += y
-        return String(s)
+        return str(s)
 
 fn main():
     try:
-        let f = open("day00.txt", "r")
-        let s = Solution(f.read())
+        f = open("day00.txt", "r")
+        s = Solution(f.read())
         print(s.part1())
         print(s.part2())
     except e:

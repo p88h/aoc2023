@@ -1,31 +1,30 @@
 from parser import *
-from collections.vector import DynamicVector
+from collections import List
 from wrappers import minibench
-from math import min, max
 from array import Array
 
 
 fn main() raises:
-    let f = open("day03.txt", "r")
-    let lines = make_parser["\n"](f.read())
-    let dimx = lines.get(0).size
-    let dimy = lines.length()
+    f = open("day03.txt", "r")
+    lines = make_parser["\n"](f.read())
+    dimx = lines.get(0).size
+    dimy = lines.length()
     # Here we'll keep all the found numbers - the format is POS_Y,POS_X,LENGTH,VALUE
-    let nums = Array[DType.int32](2000 * 8)
+    nums = Array[DType.int32](2000 * 8)
     var cnt = 0
     # And here we'll keep all the information about gears. We just keep a huge table
     # with enough space to have gears in all position of the board. No hashing - the
     # gear position _is_ the index into this array.
-    let gears = Array[DType.int32](dimy * dimx)
+    gears = Array[DType.int32](160 * 160)
 
     @parameter
     fn push_num(y: Int, x: Int, l: Int, v: Int):
         # Bounding box around the number
-        let sx = max(x - 1, 0)
-        let lx = min(x + l, dimx - 1)
-        let sy = max(y - 1, 0)
-        let ly = min(y + 1, dimy - 1)
-        nums.aligned_simd_store[8](cnt * 8, SIMD[DType.int32, 8](sx, lx, sy, ly, v))
+        sx = max(x - 1, 0)
+        lx = min(x + l, dimx - 1)
+        sy = max(y - 1, 0)
+        ly = min(y + 1, dimy - 1)
+        nums.store[width=8](cnt * 8, SIMD[DType.int32, 8](sx, lx, sy, ly, v))
         cnt += 1
 
     # This is the common 'parse' task: scan the board and find anythin that looks like
@@ -38,9 +37,9 @@ fn main() raises:
         for y in range(lines.length()):
             var r: Int = 0
             var q: Int = 0
-            let line = lines[y]
+            line = lines[y]
             for x in range(dimx):
-                let c = line[x].to_int()
+                c = int(line[x])
                 # char is in 0..9 range
                 if c >= 48 and c <= 57:
                     r = r * 10 + c - 48
@@ -58,18 +57,18 @@ fn main() raises:
     # If any are found, will increment the sum.
     @parameter
     fn step1(i: Int) -> Int64:
-        let rec = nums.aligned_simd_load[8](i * 8)
+        rec = nums.load[width=8](i * 8)
         # unpack
-        let sx = rec[0]
-        let lx = rec[1]
-        let sy = rec[2]
-        let ly = rec[3]
-        let v = rec[4].to_int()
+        sx = rec[0]
+        lx = rec[1]
+        sy = rec[2]
+        ly = rec[3]
+        v = int(rec[4])
         # Scan the box. This is rather fast in Mojo.
         for gy in range(sy, ly + 1):
-            let line = lines[gy]
+            line = lines[gy]
             for gx in range(sx, lx + 1):
-                let c = line[gx]
+                c = line[gx]
                 # Not a number and not a dot
                 if (c < 48 or c > 57) and (c != 46):
                     return v
@@ -85,30 +84,30 @@ fn main() raises:
     # Part 2 is actually really similar to Part1, but we're only looking for stars.
     @parameter
     fn step2(i: Int) -> Int64:
-        let rec = nums.aligned_simd_load[8](i * 8)
+        rec = nums.load[width=8](i * 8)
         # unpack
-        let sx = rec[0]
-        let lx = rec[1]
-        let sy = rec[2]
-        let ly = rec[3]
-        let v = rec[4].to_int()
+        sx = rec[0]
+        lx = rec[1]
+        sy = rec[2]
+        ly = rec[3]
+        v = int(rec[4])
         var sum2: Int64 = 0
         for gy in range(sy, ly + 1):
-            let line = lines[gy]
+            line = lines[gy]
             for gx in range(sx, lx + 1):
                 if line[gx] == 42:
                     # If a star is found, look up its state (previously found neighbor value) in `gears`
-                    let gk = (gy * dimy + gx)
+                    gk = gy * dimy + gx
                     # Apparently, there is never a gear with more than tow neighbors so this is sufficient
                     if gears[gk] > 0:
-                        sum2 += (v * gears[gk].to_int())
+                        sum2 += v * int(gears[gk])
                     # Just store the current value.
                     gears[gk] = v
         return sum2
 
     @parameter
     fn part2() -> Int64:
-        gears.clear()
+        gears.zero()
         var sum2: Int64 = 0
         for i in range(cnt):
             sum2 += step2(i)

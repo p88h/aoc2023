@@ -3,14 +3,14 @@ from math import sqrt
 from wrappers import minibench
 from quicksort import qsort
 from array import Array
-from memory.buffer import Buffer
+
 
 fn main() raises:
-    let f = open("day07.txt", "r")
-    let tokens = make_parser[" "](f.read().replace("\n", " "))
-    let mapp = Pointer[Int].alloc(128)
-    let codes = Array[DType.int32](tokens.length() // 2)
-    let counts = Buffer[16, DType.int8].aligned_stack_allocation[16]()
+    f = open("day07.txt", "r")
+    tokens = make_parser[" "](f.read().replace("\n", " "))
+    mapp = Array[DType.int32](128)
+    codes = Array[DType.int32](tokens.length() // 2)
+    counts = Array[DType.int8](128)
 
     # Converts the hand (passed in the ss) to a integer value representaion
     # high-ish bits represent the rank, low-ish represent the cards themselves
@@ -24,21 +24,20 @@ fn main() raises:
 
         # Compute the counts of cards, and the card value index by iterating
         # through the hand. counts keeps track of occurances of each card;
-        @unroll
         for p in range(5):
-            let c = mapp[ss[p].to_int()]
+            c = int(mapp[int(ss[p])])
             counts[c] += 1
             r = r * 14 + c
         # Joker code
-        let jc = mapp.load(74)
+        jc = mapp.load(74)
         # ideally this should be optimized out if joke = 0 at compile time
-        let j = counts[jc] * joke
+        j = int(counts[int(jc)]) * joke
         var s = 6
         # This allows us to determine the top card counts.
         # counts are all +1 to make them non-zero
         # the possible values are:
         # 5:0 - 6, 4:1 - 10, 3:2 - 12, 3:1:1 - 16, 2:2:1 - 18, 2:1:1:1 - 24, 1:1:1:1:1 - 32
-        let kpro = counts.aligned_simd_load[16,16](0).reduce_mul()
+        kpro = counts.load[width=16](0).reduce_mul()
         # 5-of-a-kind -> there is a group of count 5
         if kpro == 6:
             s = 0
@@ -79,7 +78,7 @@ fn main() raises:
 
     @parameter
     fn prep() -> Int64:
-        let alphabet = String("AKQJT98765432")
+        alphabet = String("AKQJT98765432")
         # Map characters to their order values
         for i in range(len(alphabet)):
             mapp.store(ord(alphabet[i]), i)
@@ -90,16 +89,16 @@ fn main() raises:
         # map the joker to 3 or 13
         mapp[74] = 3 + joke * 10
         for l in range(tokens.length() // 2):
-            let code = rank[joke](tokens[l*2])
-            let score = atoi(tokens[l * 2 + 1]).to_int()
-            codes[l] = code * 1024 + score
+            code = rank[joke](tokens[l * 2])
+            score = atoi(tokens[l * 2 + 1])
+            codes[l] = code * 1024 + int(score)
         qsort[1](codes)
         var p = codes.size
         var s: Int32 = 0
         for i in range(codes.size):
             s += (codes[i] & 1023) * p
             p -= 1
-        return s.to_int()
+        return int(s)
 
     @parameter
     fn part1() -> Int64:
@@ -113,5 +112,4 @@ fn main() raises:
     minibench[part1]("part1")
     minibench[part2]("part2")
     print(tokens.length(), "tokens")
-    print(codes.bytecount() + counts.bytecount(), "bytes")
-    mapp.free()
+    print(codes.bytecount() + counts.bytecount() + mapp.bytecount(), "bytes")

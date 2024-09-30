@@ -3,8 +3,8 @@ from wrappers import minibench
 from array import Array
 
 fn main() raises:
-    let f = open("day11.txt", "r")
-    let lines = make_parser['\n'](f.read())
+    f = open("day11.txt", "r")
+    lines = make_parser['\n'](f.read())
 
     fn compute1(owned exp: Array[DType.int64], owned cnt: Array[DType.int64]) -> Int64:
         var pos: Int64 = 0
@@ -21,21 +21,22 @@ fn main() raises:
     @parameter
     fn compute(cosmic_constant: Int64) -> Int64:
         # initializers for blank space detection
-        let dimy = lines.length()
-        let dimx = lines.get(0).size
-        var vexp = Array[DType.int64](dimy, cosmic_constant)
-        var hexp = Array[DType.int64](dimx, cosmic_constant)
-        var vcnt = Array[DType.int64](dimy, 0)
-        var hcnt = Array[DType.int64](dimx, 0)
+        dimy = lines.length()
+        dimx = lines.get(0).size
+        var vexp = Array[DType.int64](256, cosmic_constant)
+        var hexp = Array[DType.int64](256, cosmic_constant)
+        var vcnt = Array[DType.int64](256)
+        var hcnt = Array[DType.int64](256)
         # find empty lines
         alias cHash = ord('#')
         for i in range(dimy):
             for j in range(dimx):
                 if lines[i][j] == cHash:
-                    vexp[i] = hexp[j] = 1
+                    vexp[i] = 1
+                    hexp[j] = 1
                     vcnt[i] += 1
                     hcnt[j] += 1
-        return compute1(hexp ^, hcnt ^) + compute1(vexp ^, vcnt ^)
+        return compute1(hexp, hcnt) + compute1(vexp, vcnt)
 
     @parameter
     fn part1() -> Int64:

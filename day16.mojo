@@ -2,18 +2,19 @@ from algorithm import parallelize
 from parser import *
 from wrappers import minibench
 from array import Array
-from math import max
+from os.atomic import Atomic
 
 
 fn main() raises:
-    let f = open("day16.txt", "r")
-    let tiles = make_parser["\n"](f.read())
-    let dimx = tiles.length()
-    let dimy = tiles[0].size
-    let scnt = dimx * 2 + dimy * 2
-    let ignored = Array[DType.int16](1000)
+    f = open("day16.txt", "r")
+    tiles = make_parser["\n"](f.read())
+    dimx = tiles.length()
+    dimy = tiles[0].size
+    scnt = dimx * 2 + dimy * 2
+    ignored = Array[DType.int16](1000)
     var mmax = Atomic[DType.int64](0)
 
+    @always_inline
     fn bidx(x: Int32, y: Int32) -> Int32:
         if (y + 1) % 111 != 0:
             return ((x + 1) % 2) * 110 + y + 1
@@ -24,38 +25,34 @@ fn main() raises:
         var current = Array[DType.int32](1000)
         var next = Array[DType.int32](1000)
         var visited = Array[DType.int8](110 * 110)
-        var x: Int32
-        var y: Int32
-        var dx: Int32
-        var dy: Int32
         (x, y, dx, dy) = (start[0], start[1], start[2], start[3])
-        let b = bidx(x, y)
-        if ignored[b.to_int()] != 0:
+        b = bidx(x, y)
+        if ignored[int(b)] != 0:
             return 0
         var curs = 4
-        var warm = Atomic[DType.int64](0)
-        current.data.aligned_simd_store[4, 4](0, start)
+        var warm = 0
+        current.store[width=4](0, start)
         while curs > 0:
             var nexs = 0
             for i in range(0, curs, 4):
-                let tmp = current.data.aligned_simd_load[4, 4](i)
+                tmp = current.load[width=4](i)
                 (x, y, dx, dy) = (tmp[0], tmp[1], tmp[2], tmp[3])
                 # move out of the previous tile
                 x += dx
                 y += dy
                 # out of bounds
                 if x < 0 or y < 0 or x >= dimx or y >= dimy:
-                    ignored[bidx(x, y).to_int()] = 1
+                    ignored[int(bidx(x, y))] = 1
                     continue
                 # if we already _entered_ this tile this way, skip
-                let op = (y * dimx + x).to_int()
-                let bp = (1 << (dy + 1) * 3 + (dx + 1)).to_int()  # maps to bits 5,3,2,0
+                op = int(y * dimx + x)
+                bp = int(1 << (dy + 1) * 3 + (dx + 1))  # maps to bits 5,3,2,0
                 if visited[op] & bp != 0:
                     continue
                 if visited[op] == 0:
                     warm += 1
                 visited[op] |= bp
-                let t = tiles[y.to_int()][x.to_int()]
+                t = tiles[int(y)][int(x)]
                 alias cDot = ord(".")
                 alias cPipe = ord("|")
                 alias cDash = ord("-")
@@ -63,30 +60,31 @@ fn main() raises:
                 alias cBack = ord("\\")
                 # empty or ignored splitter
                 if t == cDot or (t == cPipe and dx == 0) or (t == cDash and dy == 0):
-                    next.data.aligned_simd_store[4, 4](nexs, SIMD[DType.int32, 4](x, y, dx, dy))
+                    next.store[width=4](nexs, SIMD[DType.int32, 4](x, y, dx, dy))
                     nexs += 4
                 # split vertically
                 elif t == cPipe and dx != 0:
-                    next.data.aligned_simd_store[4, 4](nexs, SIMD[DType.int32, 4](x, y, 0, 1))
-                    next.data.aligned_simd_store[4, 4](nexs + 4, SIMD[DType.int32, 4](x, y, 0, -1))
+                    next.store[width=4](nexs, SIMD[DType.int32, 4](x, y, 0, 1))
+                    next.store[width=4](nexs + 4, SIMD[DType.int32, 4](x, y, 0, -1))
                     nexs += 8
                 # or horizontally
                 elif t == cDash and dy != 0:
-                    next.data.aligned_simd_store[4, 4](nexs, SIMD[DType.int32, 4](x, y, 1, 0))
-                    next.data.aligned_simd_store[4, 4](nexs + 4, SIMD[DType.int32, 4](x, y, -1, 0))
+                    next.store[width=4](nexs, SIMD[DType.int32, 4](x, y, 1, 0))
+                    next.store[width=4](nexs + 4, SIMD[DType.int32, 4](x, y, -1, 0))
                     nexs += 8
                 # mirror 1
                 elif t == cSlash:
-                    next.data.aligned_simd_store[4, 4](nexs, SIMD[DType.int32, 4](x, y, -dy, -dx))
+                    next.store[width=4](nexs, SIMD[DType.int32, 4](x, y, -dy, -dx))
                     nexs += 4
                 # mirror 2
                 elif t == cBack:
-                    next.data.aligned_simd_store[4, 4](nexs, SIMD[DType.int32, 4](x, y, dy, dx))
+                    next.store[width=4](nexs, SIMD[DType.int32, 4](x, y, dy, dx))
                     nexs += 4
             curs = nexs
-            current.swap(next)
-        return warm.value
+            swap(current.data, next.data)
+        return warm
 
+    @parameter
     fn start(i: Int) -> SIMD[DType.int32, 4]:
         if i < dimx:
             return SIMD[DType.int32, 4](i, -1, 0, 1)
@@ -98,6 +96,7 @@ fn main() raises:
 
     @parameter
     fn part1() -> Int64:
+        ignored[int(bidx(-1, 0))] = 0
         return bfs(SIMD[DType.int32, 4](-1, 0, 1, 0))
 
     alias chunk_size = 10
@@ -111,20 +110,20 @@ fn main() raises:
 
     @parameter
     fn part2() -> Int64:
-        ignored.clear()
+        ignored.zero()
         for i in range(scnt // chunk_size):
             step2(i)
         return mmax.value
 
     @parameter
     fn part2_parallel() -> Int64:
-        ignored.clear()
-        parallelize[step2](scnt // chunk_size, 24)
+        ignored.zero()
+        parallelize[step2](scnt // chunk_size)
         return mmax.value
 
     minibench[part1]("part1")
     minibench[part2]("part2")
     minibench[part2_parallel]("part2_parallel")
 
-    print(tiles.length(), "tokens", dimx, dimy)
-    print(ignored.bytecount(), "temp size")
+    print(tiles.length(), "tokens", dimx, dimy, scnt)
+    print(ignored.bytecount(), "temp size", mmax.value)

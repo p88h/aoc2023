@@ -3,7 +3,7 @@ import time
 import benchmark
 
 fn minibench[fun: fn () capturing -> Int64](label: StringLiteral, loops: Int = 100):
-    units = VariadicList[StringLiteral]("ns", "μs", "ms", "s")
+    units = List("ns", "μs", "ms", "s")
     var start = time.now()
     var end = start
     var sloop = loops // 10

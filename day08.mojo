@@ -1,4 +1,4 @@
-from parser import *
+from parser import make_parser
 from wrappers import minibench
 from algorithm import parallelize
 from memory import memset

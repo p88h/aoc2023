@@ -12,7 +12,10 @@ def find_nums():
         r = 0
         q = 0
         for x in range(dimx):
-            c = ord(lines[y][x])
+            try:
+                c = ord(lines[y][x])
+            except IndexError:
+                c = 0
             if c >= 48 and c <= 57:
                 d = c - 48
                 r = r * 10 + d
@@ -56,7 +59,11 @@ def part2():
         ly = min(y + 1, dimy - 1)
         for gy in range(sy, ly + 1):
             for gx in range(sx, lx + 1):
-                if lines[gy][gx] == "*":
+                try:
+                    c = lines[gy][gx]
+                except IndexError:
+                    c = ''
+                if c == "*":
                     gk = gy * dimx + gx
                     if gc[gk] != 0:
                         s2 += gc[gk] * v

@@ -1,4 +1,4 @@
-from parser import *
+from parser import make_parser
 from collections import List
 from wrappers import minibench
 

@@ -1,4 +1,4 @@
-from parser import *
+from parser import make_parser
 from algorithm import parallelize
 from wrappers import minibench
 from array import Array

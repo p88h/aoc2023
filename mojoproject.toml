@@ -1,6 +1,6 @@
 [project]
 authors = ["Staszek Pasko <staszek@gmail.com>"]
-channels = ["conda-forge", "https://conda.modular.com/max"]
+channels = ["conda-forge", "https://conda.modular.com/max-nightly"]
 description = "Advent of Code 2023 (in Mojo)"
 name = "aoc2023"
 platforms = ["linux-64"]

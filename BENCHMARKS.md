@@ -15,6 +15,7 @@ mojo 24.5.0 (e8aacb95)
 ```
 
 ```
+Task            Python      Pypy3       Mojo        parallel    * speedups
 Day01 part1     0.74 ms     0.15 ms     7.70 μs     2.95 μs     * 49 - 252
 Day01 part2     3.03 ms     0.33 ms     0.05 ms     7.11 μs     * 46 - 426
 Day02 part1     0.32 ms     0.11 ms     0.11 ms     0.02 ms     * 4 - 12

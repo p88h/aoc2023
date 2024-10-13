@@ -1,4 +1,4 @@
-from parser import *
+from parser import make_parser
 from array import Array
 from wrappers import minibench
 from bit import pop_count

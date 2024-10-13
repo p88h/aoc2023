@@ -1,6 +1,7 @@
 from memory.unsafe_pointer import UnsafePointer
 from memory import memcpy
 from collections import List
+from utils import StringRef, Span
 
 from wrappers import minibench
 
@@ -35,6 +36,12 @@ struct StringSlice(CollectionElement, Stringable, Formattable):
             end = self.size
         start = idxs.start.or_else(0)
         return StringSlice(self.ptr.offset(start), end - start)
+
+    fn as_bytes_span(self) -> Span[UInt8, __lifetime_of(self)]:
+        return Span[UInt8, __lifetime_of(self)](
+            unsafe_ptr=self.ptr,
+            len=self.size,
+        )
     
     fn format_to(self, inout writer: Formatter):
         writer.write(str(self))

@@ -4,6 +4,6 @@ if [ `uname` == "Darwin" ]; then
 fi
 echo $suffix
 
-( echo $1.py; python3 $1.py ) | tee -a all_python3_$suffix.txt
-( echo $1.py; pypy3 $1.py ) | tee -a all_pypy3_$suffix.txt
-( echo $1.mojo; mojo $1.mojo ) | tee -a all_mojo_$suffix.txt
+( echo day$1.py; python3 day$1.py ) | tee -a all_python3_$suffix.txt
+( echo day$1.py; pypy3 day$1.py ) | tee -a all_pypy3_$suffix.txt
+( echo day$1.mojo; mojo day$1.mojo ) | tee -a all_mojo_$suffix.txt

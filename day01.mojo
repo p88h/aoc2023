@@ -1,4 +1,4 @@
-from parser import *
+from parser import make_parser
 from os.atomic import Atomic
 from collections import List
 from wrappers import run_multiline_task
@@ -23,24 +23,19 @@ struct MultiMatcher:
     var pfx: List[Int32]
     var msk: List[Int32]
 
-    fn __init__(inout self, words: VariadicList[StringLiteral]):
+    fn __init__(inout self, words: List[String]) raises:
         self.fcv = List[UInt8]()
         self.pfx = List[Int32]()
         self.msk = List[Int32]()
-        for i in range(len(words)):
-            self.add(words[i])
+        for w in words:
+            self.add(w[])
 
-    fn add(inout self, s: String):
-        l = len(s)
-        # s._buffer[l - 1] == ord(s[i]); but works faster it seems
-        # Not sure if accessing _buffer is discouraged? Probably will break one day.
-        self.fcv.append(s._buffer[l - 1])
+    fn add(inout self, s: String) raises:
+        self.fcv.append(ord(s[-1]))
         var r: Int32 = 0
         var m: Int32 = 0
-        # While iterators are supported in Mojo, none of the standard library
-        # types implement them, have to use range(), which does work.
-        for i in range(l - 1):
-            r = (r << 8) + int(s._buffer[i])
+        for c in s[:-1]:
+            r = (r << 8) + ord(c)
             m = (m << 8) + 0xFF
         self.pfx.append(r)
         self.msk.append(m)
@@ -89,11 +84,11 @@ fn main() raises:
         a1 += lsum
 
     # Construct matchers for all words. When looking backwards, the words have to be reversed.
-    # Fun fact - VariadicList apparently can hold literals, but cannot hold Strings.
+    # Fun fact - List apparently can hold literals, but cannot hold Strings.
     # Variadic since other list variants only make sense in some very specific contexts
     # like when you only use predetermined list sizes and don't iterate over the list.
-    m = MultiMatcher(VariadicList[StringLiteral]("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"))
-    r = MultiMatcher(VariadicList[StringLiteral]("orez", "eno", "owt", "eerht", "ruof", "evif", "xis", "neves", "thgie", "enin"))
+    m = MultiMatcher(List[String]("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"))
+    r = MultiMatcher(List[String]("orez", "eno", "owt", "eerht", "ruof", "evif", "xis", "neves", "thgie", "enin"))
 
     # Similar to the part 1, this does the digits checks and also uses the multi-matchers
     # to find words.
@@ -106,8 +101,8 @@ fn main() raises:
             var d2 = 0
             # last four characters code
             var l4: Int32 = 0
-            for i in range(s.size):
-                c = int(s[i])
+            for c_ref in s.as_bytes_span():
+                c = int(c_ref[])
                 var d = -1
                 if c >= zero and c <= nine:
                     d = c - zero
@@ -119,8 +114,8 @@ fn main() raises:
                     d1 = d
                     break
             l4 = 0
-            for i in range(s.size - 1, -1, -1):
-                c = int(s[i])
+            for c_ref in s.as_bytes_span()[::-1]:
+                c = int(c_ref[])
                 var d = -1
                 if c >= zero and c <= nine:
                     d = c - zero

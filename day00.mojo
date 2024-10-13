@@ -1,4 +1,4 @@
-from parser import *
+from parser import make_parser
 
 struct Solution:
     var parse: Parser

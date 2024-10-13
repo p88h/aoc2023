@@ -1,4 +1,4 @@
-from parser import *
+from parser import make_parser
 from wrappers import run_multiline_task
 from array import Array
 from memory import memcpy, memset

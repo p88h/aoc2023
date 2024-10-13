@@ -1,4 +1,4 @@
-from parser import *
+from parser import make_parser
 from math import sqrt
 from wrappers import minibench
 from quicksort import qsort

@@ -1,4 +1,4 @@
-from parser import *
+from parser import make_parser
 from wrappers import minibench
 from array import Array
 

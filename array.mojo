@@ -37,7 +37,7 @@ struct Array[AType: DType](CollectionElement):
     fn fill(inout self, value: SIMD[AType, 1] = 0):
         initializer = SIMD[AType, Self.simd_width](value)
         for i in range((self.size + Self.simd_width - 1) // Self.simd_width):
-            self.data.store[width=Self.simd_width](i * Self.simd_width, initializer)
+            self.data.store(i * Self.simd_width, initializer)
     
     fn swap(inout self, inout other: Self):
         (self.data, other.data) = (other.data, self.data)
@@ -54,10 +54,10 @@ struct Array[AType: DType](CollectionElement):
         return self.data.load[width=width](ofs)
 
     fn store[width: Int, T: IntLike](self, ofs: T, val: SIMD[AType, width]):
-        self.data.store[width=width](ofs, val)
+        self.data.store(ofs, val)
 
     fn load[T: IntLike](self, ofs: T) -> SIMD[AType, 1]:
         return self.data.load[width=1](ofs)
 
     fn store[T: IntLike](self, ofs: T, val: SIMD[AType, 1]):
-        self.data.store[width=1](ofs, val)
+        self.data.store(ofs, val)
